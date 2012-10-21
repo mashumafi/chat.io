@@ -1,5 +1,12 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+    h1= title
+    p Welcome to #{title}
+    script(type="text/javascript", src="/socket.io/socket.io.js")
+    script(type="text/javascript")
+        socket = io.connect('http://chat_io.mashumafi.c9.io/');
+        socket.on('login', function (data) {
+            alert(data.email);
+        });
+        socket.emit('login', { username: "mashumafi", password: "password" });

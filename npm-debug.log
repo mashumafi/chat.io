@@ -1,0 +1,445 @@
+info it worked if it ends with ok
+verbose cli [ '/var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data//bin/node-openshift',
+verbose cli   '/usr/bin/npm',
+verbose cli   'install' ]
+info using npm@1.1.24
+info using node@v0.6.19
+verbose /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data//bin/node-openshift node symlink
+verbose config file /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npmrc
+verbose config file /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/etc/npmrc
+verbose config file /usr/lib/node_modules/npm/npmrc
+verbose caching /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/package.json
+verbose loadDefaults chat-io@0.0.1
+verbose readDependencies: using package.json deps
+verbose where, deps [ '/var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558',
+verbose where, deps   [ 'express', 'jade', 'mongodb', 'socket.io', 'bcrypt' ] ]
+verbose from cache /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/package.json
+info preinstall chat-io@0.0.1
+verbose caching /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/express/package.json
+verbose caching /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/jade/package.json
+verbose caching /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/socket.io/package.json
+verbose caching /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/mongodb/package.json
+verbose from cache /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/package.json
+verbose readDependencies: using package.json deps
+verbose from cache /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/express/package.json
+verbose from cache /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/jade/package.json
+verbose from cache /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/socket.io/package.json
+verbose from cache /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/mongodb/package.json
+verbose already installed in /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558 skipping socket.io@*
+verbose cache add [ 'bcrypt@*', null ]
+silly cache add: name, spec, args [ undefined, 'bcrypt@*', [ 'bcrypt@*', null ] ]
+verbose parsed url { pathname: 'bcrypt@*', path: 'bcrypt@*', href: 'bcrypt@*' }
+silly cache add: name, spec, args [ 'bcrypt', '*', [ 'bcrypt', '*' ] ]
+verbose parsed url { pathname: '*', path: '*', href: '*' }
+verbose addNamed [ 'bcrypt', '*' ]
+verbose addNamed [ null, '' ]
+silly name, range, hasData [ 'bcrypt', '', false ]
+verbose already installed in /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558 skipping express@3.0.0rc4
+verbose already installed in /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558 skipping jade@*
+verbose already installed in /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558 skipping mongodb@*
+verbose raw, before any munging bcrypt
+verbose url resolving [ 'https://registry.npmjs.org/', './bcrypt' ]
+verbose url resolved https://registry.npmjs.org/bcrypt
+http GET https://registry.npmjs.org/bcrypt
+http 200 https://registry.npmjs.org/bcrypt
+silly get cb [ 200,
+silly get cb   { vary: 'Accept',
+silly get cb     server: 'CouchDB/1.2.0 (Erlang OTP/R15B)',
+silly get cb     etag: '"7392R794EPZF79A1MTBAHBI30"',
+silly get cb     date: 'Mon, 22 Oct 2012 01:41:10 GMT',
+silly get cb     'content-type': 'application/json',
+silly get cb     'content-length': '68131' } ]
+silly name, range, hasData 2 [ 'bcrypt', '', true ]
+silly versions [ 'bcrypt',
+silly versions   [ '0.1.2',
+silly versions     '0.2.0',
+silly versions     '0.2.1',
+silly versions     '0.1.3',
+silly versions     '0.2.2',
+silly versions     '0.2.3',
+silly versions     '0.2.4',
+silly versions     '0.3.0',
+silly versions     '0.3.1',
+silly versions     '0.3.2',
+silly versions     '0.4.0',
+silly versions     '0.4.1',
+silly versions     '0.5.0',
+silly versions     '0.6.0',
+silly versions     '0.7.0',
+silly versions     '0.7.1',
+silly versions     '0.7.2' ] ]
+verbose bin dist [ '0.6-ares1.7.5-DEV-evundefined-openssl1.0.0-fips-v83.6.6.25-linux-x64-2.6.32-279.11.1.el6.x86_64',
+verbose bin dist   { shasum: 'e5cef20f2456630787bae59f5825f61c65508766',
+verbose bin dist     tarball: 'http://registry.npmjs.org/bcrypt/-/bcrypt-0.7.2.tgz' } ]
+verbose addRemoteTarball [ 'https://registry.npmjs.org/bcrypt/-/bcrypt-0.7.2.tgz',
+verbose addRemoteTarball   'e5cef20f2456630787bae59f5825f61c65508766' ]
+verbose fetch to /tmp/npm-1350870070917/1350870070917-0.5583861137274653/tmp.tgz
+http GET https://registry.npmjs.org/bcrypt/-/bcrypt-0.7.2.tgz
+http 200 https://registry.npmjs.org/bcrypt/-/bcrypt-0.7.2.tgz
+silly updated sha bytes 25675
+info shasum e5cef20f2456630787bae59f5825f61c65508766
+info shasum /tmp/npm-1350870070917/1350870070917-0.5583861137274653/tmp.tgz
+verbose unpack /tmp/npm-1350870070917/1350870070917-0.5583861137274653/tmp.tgz
+silly gunzTarPerm modes [ '755', '644' ]
+silly extracting entry package.json
+silly extracting entry .npmignore
+silly extracting entry README.md
+silly extracting entry LICENSE
+silly extracting entry bcrypt.js
+silly extracting entry CHANGELOG
+silly extracting entry Makefile
+silly extracting entry examples/forever_gen_salt.js
+silly extracting entry examples/async_compare.js
+silly extracting entry test/async.js
+silly extracting entry test/deprecated.js
+silly extracting entry test/repetitions.js
+silly extracting entry test/sync.js
+silly extracting entry src/bcrypt.cc
+silly extracting entry src/node_blf.h
+silly extracting entry src/blowfish.cc
+silly extracting entry src/bcrypt_node.cc
+silly extracting entry .travis.yml
+silly extracting entry wscript
+silly extracting entry binding.gyp
+verbose has bindings.gyp [ undefined,
+verbose has bindings.gyp   { file: '/tmp/npm-1350870070917/1350870070917-0.5583861137274653/package/package.json',
+verbose has bindings.gyp     gypfile: true,
+verbose has bindings.gyp     contributors: false,
+verbose has bindings.gyp     serverjs: false,
+verbose has bindings.gyp     wscript: true } ]
+verbose has wscript [ undefined,
+verbose has wscript   { file: '/tmp/npm-1350870070917/1350870070917-0.5583861137274653/package/package.json',
+verbose has wscript     gypfile: true,
+verbose has wscript     contributors: false,
+verbose has wscript     serverjs: false,
+verbose has wscript     wscript: true } ]
+verbose caching /tmp/npm-1350870070917/1350870070917-0.5583861137274653/package/package.json
+verbose loadDefaults bcrypt@0.7.2
+verbose from cache /tmp/npm-1350870070917/1350870070917-0.5583861137274653/package/package.json
+verbose tar.pack [ '/var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bcrypt/0.7.2/package.tgz',
+verbose tar.pack   '/tmp/npm-1350870070917/1350870070917-0.5583861137274653/package' ]
+verbose tarball /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bcrypt/0.7.2/package.tgz
+verbose folder /tmp/npm-1350870070917/1350870070917-0.5583861137274653/package
+verbose unpack /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bcrypt/0.7.2/package.tgz
+silly gunzTarPerm modes [ '755', '644' ]
+silly extracting entry package.json
+silly extracting entry .npmignore
+silly extracting entry README.md
+silly extracting entry LICENSE
+silly extracting entry bcrypt.js
+silly extracting entry Makefile
+silly extracting entry src/bcrypt.cc
+silly extracting entry src/bcrypt_node.cc
+silly extracting entry src/blowfish.cc
+silly extracting entry src/node_blf.h
+silly extracting entry test/repetitions.js
+silly extracting entry test/async.js
+silly extracting entry test/sync.js
+silly extracting entry test/deprecated.js
+silly extracting entry .travis.yml
+silly extracting entry binding.gyp
+silly extracting entry CHANGELOG
+silly extracting entry examples/async_compare.js
+silly extracting entry examples/forever_gen_salt.js
+silly extracting entry wscript
+verbose has bindings.gyp [ undefined,
+verbose has bindings.gyp   { file: '/var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bcrypt/0.7.2/package/package.json',
+verbose has bindings.gyp     gypfile: true,
+verbose has bindings.gyp     contributors: false,
+verbose has bindings.gyp     serverjs: false,
+verbose has bindings.gyp     wscript: true } ]
+verbose has wscript [ undefined,
+verbose has wscript   { file: '/var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bcrypt/0.7.2/package/package.json',
+verbose has wscript     gypfile: true,
+verbose has wscript     contributors: false,
+verbose has wscript     serverjs: false,
+verbose has wscript     wscript: true } ]
+verbose caching /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bcrypt/0.7.2/package/package.json
+verbose loadDefaults bcrypt@0.7.2
+silly updated sha bytes 25521
+info shasum 13ae1b21c6e509faee4badb523aa7a71d78295d0
+info shasum /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bcrypt/0.7.2/package.tgz
+verbose from cache /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bcrypt/0.7.2/package/package.json
+verbose chmod /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bcrypt/0.7.2/package.tgz 644
+verbose chown [ '/var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bcrypt/0.7.2/package.tgz',
+verbose chown   3108,
+verbose chown   3108 ]
+silly resolved [ { name: 'bcrypt',
+silly resolved     description: 'A bcrypt library for NodeJS.',
+silly resolved     keywords: 
+silly resolved      [ 'bcrypt',
+silly resolved        'password',
+silly resolved        'auth',
+silly resolved        'authentication',
+silly resolved        'encryption',
+silly resolved        'crypt',
+silly resolved        'crypto' ],
+silly resolved     main: './bcrypt',
+silly resolved     version: '0.7.2',
+silly resolved     author: { name: 'Nick Campbell', url: 'http://github.com/ncb000gt' },
+silly resolved     engines: { node: '>= 0.6.0' },
+silly resolved     repository: 
+silly resolved      { type: 'git',
+silly resolved        url: 'git://github.com/ncb000gt/node.bcrypt.js.git' },
+silly resolved     licenses: [ { type: 'MIT' } ],
+silly resolved     bugs: { url: 'http://github.com/ncb000gt/node.bcrypt.js/issues' },
+silly resolved     scripts: 
+silly resolved      { test: 'node-gyp configure build && nodeunit test',
+silly resolved        install: 'node-gyp rebuild' },
+silly resolved     dependencies: { bindings: '1.0.0' },
+silly resolved     devDependencies: { nodeunit: '>=0.6.4' },
+silly resolved     contributors: 
+silly resolved      [ { name: 'Antonio Salazar Cardozo',
+silly resolved          email: 'savedfastcool@gmail.com',
+silly resolved          url: 'https://github.com/Shadowfiend' },
+silly resolved        { name: 'Van Nguyen',
+silly resolved          email: 'the.gol.effect@gmail.com',
+silly resolved          url: 'https://github.com/thegoleffect' },
+silly resolved        { name: 'David Trejo',
+silly resolved          email: 'david@dtrejo.com',
+silly resolved          url: 'https://github.com/dtrejo' },
+silly resolved        { name: 'Ben Glow',
+silly resolved          email: 'glen.low@pixelglow.com',
+silly resolved          url: 'https://github.com/pixelglow' },
+silly resolved        { name: 'NewITFarmer.com',
+silly resolved          url: 'https://github.com/newitfarmer' },
+silly resolved        { name: 'Alfred Westerveld',
+silly resolved          email: 'alfredwesterveld@gmail.com',
+silly resolved          url: 'https://github.com/alfredwesterveld' },
+silly resolved        { name: 'Vincent Côté-Roy',
+silly resolved          email: 'vincentcr@gmail.com',
+silly resolved          url: 'https://github.com/vincentcr' },
+silly resolved        { name: 'Lloyd Hilaiel',
+silly resolved          email: 'lloyd@hilaiel.com',
+silly resolved          url: 'https://github.com/lloyd' },
+silly resolved        { name: 'Roman Shtylman',
+silly resolved          email: 'shtylman@gmail.com',
+silly resolved          url: 'https://github.com/shtylman' },
+silly resolved        { name: 'Vadim Graboys',
+silly resolved          email: 'dimva13@gmail.com',
+silly resolved          url: 'https://github.com/vadimg' },
+silly resolved        { name: 'Ben Noorduis', url: 'https://github.com/bnoordhuis' },
+silly resolved        { name: 'Nate Rajlich',
+silly resolved          email: 'nathan@tootallnate.net',
+silly resolved          url: 'https://github.com/tootallnate' },
+silly resolved        { name: 'Sean McArthur',
+silly resolved          email: 'sean.monstar@gmail.com',
+silly resolved          url: 'https://github.com/seanmonstar' },
+silly resolved        { name: 'Fanie Oosthuysen',
+silly resolved          email: 'fanie.oosthuysen@gmail.com',
+silly resolved          url: 'https://github.com/weareu' } ],
+silly resolved     _id: 'bcrypt@0.7.2',
+silly resolved     optionalDependencies: {},
+silly resolved     _engineSupported: true,
+silly resolved     _npmVersion: '1.1.24',
+silly resolved     _nodeVersion: 'v0.6.19',
+silly resolved     _defaultsLoaded: true,
+silly resolved     dist: { shasum: '13ae1b21c6e509faee4badb523aa7a71d78295d0' },
+silly resolved     _from: 'bcrypt@*' } ]
+info into /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558 bcrypt@0.7.2
+info installOne bcrypt@0.7.2
+verbose from cache /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bcrypt/0.7.2/package/package.json
+info unbuild /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt
+verbose unpack /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bcrypt/0.7.2/package.tgz
+silly gunzTarPerm modes [ '755', '644' ]
+silly extracting entry package.json
+silly extracting entry .npmignore
+silly extracting entry README.md
+silly extracting entry LICENSE
+silly extracting entry bcrypt.js
+silly extracting entry Makefile
+silly extracting entry src/bcrypt.cc
+silly extracting entry src/bcrypt_node.cc
+silly extracting entry src/blowfish.cc
+silly extracting entry src/node_blf.h
+silly extracting entry test/repetitions.js
+silly extracting entry test/async.js
+silly extracting entry test/sync.js
+silly extracting entry test/deprecated.js
+silly extracting entry .travis.yml
+silly extracting entry binding.gyp
+silly extracting entry CHANGELOG
+silly extracting entry examples/async_compare.js
+silly extracting entry examples/forever_gen_salt.js
+silly extracting entry wscript
+verbose has bindings.gyp [ undefined,
+verbose has bindings.gyp   { file: '/var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt/package.json',
+verbose has bindings.gyp     gypfile: true,
+verbose has bindings.gyp     contributors: false,
+verbose has bindings.gyp     serverjs: false,
+verbose has bindings.gyp     wscript: true } ]
+verbose has wscript [ undefined,
+verbose has wscript   { file: '/var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt/package.json',
+verbose has wscript     gypfile: true,
+verbose has wscript     contributors: false,
+verbose has wscript     serverjs: false,
+verbose has wscript     wscript: true } ]
+verbose caching /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt/package.json
+verbose loadDefaults bcrypt@0.7.2
+info preinstall bcrypt@0.7.2
+verbose from cache /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt/package.json
+verbose readDependencies: using package.json deps
+verbose from cache /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt/package.json
+verbose readDependencies: using package.json deps
+verbose cache add [ 'bindings@1.0.0', null ]
+silly cache add: name, spec, args [ undefined, 'bindings@1.0.0', [ 'bindings@1.0.0', null ] ]
+verbose parsed url { pathname: 'bindings@1.0.0',
+verbose parsed url   path: 'bindings@1.0.0',
+verbose parsed url   href: 'bindings@1.0.0' }
+silly cache add: name, spec, args [ 'bindings', '1.0.0', [ 'bindings', '1.0.0' ] ]
+verbose parsed url { pathname: '1.0.0', path: '1.0.0', href: '1.0.0' }
+verbose addNamed [ 'bindings', '1.0.0' ]
+verbose addNamed [ '1.0.0', '1.0.0' ]
+verbose raw, before any munging bindings/1.0.0
+verbose url resolving [ 'https://registry.npmjs.org/', './bindings/1.0.0' ]
+verbose url resolved https://registry.npmjs.org/bindings/1.0.0
+http GET https://registry.npmjs.org/bindings/1.0.0
+http 200 https://registry.npmjs.org/bindings/1.0.0
+silly get cb [ 200,
+silly get cb   { vary: 'Accept',
+silly get cb     server: 'CouchDB/1.2.0 (Erlang OTP/R15B)',
+silly get cb     etag: '"9OIIS4YU3XTPWRBT47K46CQMO"',
+silly get cb     date: 'Mon, 22 Oct 2012 01:41:12 GMT',
+silly get cb     'content-type': 'application/json',
+silly get cb     'content-length': '4132' } ]
+verbose bin dist [ '0.6-ares1.7.5-DEV-evundefined-openssl1.0.0-fips-v83.6.6.25-linux-x64-2.6.32-279.11.1.el6.x86_64',
+verbose bin dist   { shasum: 'c3ccde60e9de6807c6f1aa4ef4843af29191c828',
+verbose bin dist     tarball: 'http://registry.npmjs.org/bindings/-/bindings-1.0.0.tgz' } ]
+verbose addRemoteTarball [ 'https://registry.npmjs.org/bindings/-/bindings-1.0.0.tgz',
+verbose addRemoteTarball   'c3ccde60e9de6807c6f1aa4ef4843af29191c828' ]
+verbose fetch to /tmp/npm-1350870070917/1350870072353-0.6104147187434137/tmp.tgz
+http GET https://registry.npmjs.org/bindings/-/bindings-1.0.0.tgz
+http 200 https://registry.npmjs.org/bindings/-/bindings-1.0.0.tgz
+silly updated sha bytes 3456
+info shasum c3ccde60e9de6807c6f1aa4ef4843af29191c828
+info shasum /tmp/npm-1350870070917/1350870072353-0.6104147187434137/tmp.tgz
+verbose unpack /tmp/npm-1350870070917/1350870072353-0.6104147187434137/tmp.tgz
+silly gunzTarPerm modes [ '755', '644' ]
+silly extracting entry package.json
+silly extracting entry README.md
+silly extracting entry bindings.js
+verbose caching /tmp/npm-1350870070917/1350870072353-0.6104147187434137/package/package.json
+verbose loadDefaults bindings@1.0.0
+verbose from cache /tmp/npm-1350870070917/1350870072353-0.6104147187434137/package/package.json
+verbose tar.pack [ '/var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bindings/1.0.0/package.tgz',
+verbose tar.pack   '/tmp/npm-1350870070917/1350870072353-0.6104147187434137/package' ]
+verbose tarball /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bindings/1.0.0/package.tgz
+verbose folder /tmp/npm-1350870070917/1350870072353-0.6104147187434137/package
+verbose unpack /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bindings/1.0.0/package.tgz
+silly gunzTarPerm modes [ '755', '644' ]
+silly extracting entry package.json
+silly extracting entry README.md
+silly extracting entry bindings.js
+verbose caching /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bindings/1.0.0/package/package.json
+verbose loadDefaults bindings@1.0.0
+silly updated sha bytes 3451
+info shasum 91c5e316dcdd8db235cf57afbb3b204190053105
+info shasum /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bindings/1.0.0/package.tgz
+verbose from cache /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bindings/1.0.0/package/package.json
+verbose chmod /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bindings/1.0.0/package.tgz 644
+verbose chown [ '/var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bindings/1.0.0/package.tgz',
+verbose chown   3108,
+verbose chown   3108 ]
+silly resolved [ { name: 'bindings',
+silly resolved     description: 'Helper module for loading your native module\'s .node file',
+silly resolved     keywords: [ 'native', 'addon', 'bindings', 'gyp', 'waf', 'c', 'c++' ],
+silly resolved     version: '1.0.0',
+silly resolved     author: 
+silly resolved      { name: 'Nathan Rajlich',
+silly resolved        email: 'nathan@tootallnate.net',
+silly resolved        url: 'http://tootallnate.net' },
+silly resolved     repository: 
+silly resolved      { type: 'git',
+silly resolved        url: 'git://github.com/TooTallNate/node-bindings.git' },
+silly resolved     main: './bindings.js',
+silly resolved     _id: 'bindings@1.0.0',
+silly resolved     dependencies: {},
+silly resolved     devDependencies: {},
+silly resolved     optionalDependencies: {},
+silly resolved     engines: { node: '*' },
+silly resolved     _engineSupported: true,
+silly resolved     _npmVersion: '1.1.24',
+silly resolved     _nodeVersion: 'v0.6.19',
+silly resolved     _defaultsLoaded: true,
+silly resolved     dist: { shasum: '91c5e316dcdd8db235cf57afbb3b204190053105' },
+silly resolved     _from: 'bindings@1.0.0',
+silly resolved     scripts: {} } ]
+info into /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt bindings@1.0.0
+info installOne bindings@1.0.0
+verbose from cache /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bindings/1.0.0/package/package.json
+info unbuild /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt/node_modules/bindings
+verbose unpack /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/.npm/bindings/1.0.0/package.tgz
+silly gunzTarPerm modes [ '755', '644' ]
+silly extracting entry package.json
+silly extracting entry README.md
+silly extracting entry bindings.js
+verbose caching /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt/node_modules/bindings/package.json
+verbose loadDefaults bindings@1.0.0
+info preinstall bindings@1.0.0
+verbose from cache /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt/node_modules/bindings/package.json
+verbose readDependencies: using package.json deps
+verbose from cache /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt/node_modules/bindings/package.json
+verbose readDependencies: using package.json deps
+silly resolved []
+verbose about to build /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt/node_modules/bindings
+info build /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt/node_modules/bindings
+verbose from cache /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt/node_modules/bindings/package.json
+verbose linkStuff [ false,
+verbose linkStuff   false,
+verbose linkStuff   false,
+verbose linkStuff   '/var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt/node_modules' ]
+info linkStuff bindings@1.0.0
+verbose linkBins bindings@1.0.0
+verbose linkMans bindings@1.0.0
+verbose rebuildBundles bindings@1.0.0
+info install bindings@1.0.0
+info postinstall bindings@1.0.0
+verbose about to build /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt
+info build /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt
+verbose from cache /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt/package.json
+verbose linkStuff [ false,
+verbose linkStuff   false,
+verbose linkStuff   false,
+verbose linkStuff   '/var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules' ]
+info linkStuff bcrypt@0.7.2
+verbose linkBins bcrypt@0.7.2
+verbose linkMans bcrypt@0.7.2
+verbose rebuildBundles bcrypt@0.7.2
+verbose rebuildBundles [ 'bindings' ]
+info install bcrypt@0.7.2
+verbose unsafe-perm in lifecycle true
+silly exec sh "-c" "node-gyp rebuild"
+silly spawning [ 'sh',
+silly spawning   [ '-c', 'node-gyp rebuild' ],
+silly spawning   '/var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt' ]
+info bcrypt@0.7.2 Failed to exec install script
+info unbuild /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt
+verbose from cache /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules/bcrypt/package.json
+info preuninstall bcrypt@0.7.2
+info uninstall bcrypt@0.7.2
+verbose unbuild bcrypt@0.7.2 [ true,
+verbose unbuild bcrypt@0.7.2   '/var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules',
+verbose unbuild bcrypt@0.7.2   '/var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558/node_modules' ]
+info postuninstall bcrypt@0.7.2
+ERR! bcrypt@0.7.2 install: `node-gyp rebuild`
+ERR! `sh "-c" "node-gyp rebuild"` failed with 1
+ERR! 
+ERR! Failed at the bcrypt@0.7.2 install script.
+ERR! This is most likely a problem with the bcrypt package,
+ERR! not with npm itself.
+ERR! Tell the author that this fails on your system:
+ERR!     node-gyp rebuild
+ERR! You can get their info via:
+ERR!     npm owner ls bcrypt
+ERR! There is likely additional logging output above.
+ERR! 
+ERR! System Linux 2.6.32-279.11.1.el6.x86_64
+ERR! command "/var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data//bin/node-openshift" "/usr/bin/npm" "install"
+ERR! cwd /var/lib/stickshift/ca2e5f1e027841369121c1ae9186123c/app-root/data/303558
+ERR! node -v v0.6.19
+ERR! npm -v 1.1.24
+ERR! code ELIFECYCLE
+ERR! message bcrypt@0.7.2 install: `node-gyp rebuild`
+ERR! message `sh "-c" "node-gyp rebuild"` failed with 1
+ERR! errno {}
+verbose exit [ 1, true ]

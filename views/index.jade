@@ -1,12 +1,110 @@
 extends layout
 
 block content
-    h1= title
-    p Welcome to #{title}
-    script(type="text/javascript", src="/socket.io/socket.io.js")
+    form(name="loginForm")#login
+        div Username:
+        div
+            input(type="text", name="usernameL")
+        #usernameL.error
+        div Password:
+        div
+            input(type="password", name="passwordL")
+        #passwordL.error
+    form(name="registerForm")#register
+        div Username:
+        div
+            input(type="text", name="usernameR")
+        #usernameR.error
+        div Password:
+        di
+            input(type="password", name="passwordR")
+        #passwordR.error
+        div Confirm Password:
+        div 
+            input(type="password", name="passwordCfmR")
+        #passwordCfmR.error
+        div E-mail:
+        div
+            input(type="text", name="emailR")
+        #emailR.error
+        div Confirm E-mail:
+        div
+            input(type="text", name="emailCfmR")
+        #emailCfmR.error
+
     script(type="text/javascript")
-        socket = io.connect('http://chat_io.mashumafi.c9.io/');
-        socket.on('login', function (data) {
-            alert(data.email);
+
+        var loginDialog;
+            $(window).resize(function() {/*
+                loginDialog.position({
+                    my: "center",
+                    at: "center",
+                    of: window
+                });
+            */});
+        var registerDialog;
+        
+        $(document).ready(function() {
+            loginDialog = $("#login").dialog({
+                resizable: false,
+                draggable: false,
+                title: "Log In",
+                dialogClass: "no-close-x",
+                buttons: {
+                    "Log In": function() {
+                        var credentials = {
+                            username: $("input[name=usernameL]").val(),
+                            password: $("input[name=passwordL]").val()
+                        };
+                        login(credentials, function(result) {
+                            $(".error").text("");
+                            if(result.err) {
+                                for(var err in result.err) {
+                                    $("#" + err + "L").text(result.err[err]);
+                                }
+                            } else {
+                                alert(result.username + result.email);
+                            }
+                        });
+                    },
+                    "Register": function(){
+                        loginDialog.dialog("close");
+                        loginDialog[0].reset();
+                        registerDialog.dialog("open");
+                    }
+                }
+            });
+            registerDialog = $("#register").dialog({
+                resizable: false,
+                draggable: false,
+                autoOpen: false,
+                title: "Register",
+                dialogClass: "no-close-x",
+                buttons: {
+                    "Submit": function() {
+                        var credentials = {
+                            username: $("input[name=usernameR]").val(),
+                            password: $("input[name=passwordR]").val(),
+                            passwordCfm: $("input[name=passwordCfmR]").val(),
+                            email: $("input[name=emailR]").val(),
+                            emailCfm: $("input[name=emailCfmR]").val()
+                        };
+                        register(credentials, function(result) {
+                            $(".error").text("");
+                            if(result.err) {
+                                for(var err in result.err){
+                                    $("#" + err + "R").text(result.err[err]);
+                                }
+                            } else {
+                                alert(result.username + result.email);
+                            }
+                        });
+                    },
+                    "Close": function() {
+                        registerDialog.dialog("close");
+                        registerDialog[0].reset();
+                        loginDialog.dialog("open");
+                    }
+                }
+            });
         });
-        socket.emit('login', { username: "mashumafi", password: "password" });

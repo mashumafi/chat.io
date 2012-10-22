@@ -6,3 +6,11 @@ body {
 a {
   color: #00B7FF;
 }
+
+.no-close-x .ui-dialog-titlebar-close {
+    display: none;     
+}
+
+.error {
+    color: red;
+}

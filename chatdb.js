@@ -4,7 +4,7 @@ var mongo = require('mongodb'),
     crypto = require('crypto'),
     async = require("async");
 var server = new Server("alex.mongohq.com", 10011, {
-    safe: false
+    safe: true
 });
 var db = new Db("chat-io", server);
 
@@ -16,10 +16,12 @@ function open(callback) {
     });
 }
 module.exports.login = function (credentials, callback) {
+    var p_db;
     async.waterfall([
         open,
 
         function (db, callback) {
+        p_db = db;
         db.collection("users", callback);
     },
 
@@ -49,14 +51,16 @@ module.exports.login = function (credentials, callback) {
         } else {
             callback(err);
         }
-        db.close();
+        p_db.close();
     });
 };
 module.exports.register = function (credentials, callback) {
+    var p_db;
     async.waterfall([
         open,
 
         function (db, callback) {
+        p_db = db;
         db.collection("users", callback);
     },
 
@@ -67,7 +71,7 @@ module.exports.register = function (credentials, callback) {
             password: hash.password,
             salt: hash.salt,
             email: credentials.email
-        }, callback);
+        }, {safe:true}, callback);
     },
 
         function (items, callback) {
@@ -84,7 +88,7 @@ module.exports.register = function (credentials, callback) {
         } else {
             callback(err);
         }
-        db.close();
+        p_db.close();
     });
 };
 

@@ -9,34 +9,32 @@ var server = new Server("alex.mongohq.com", 10011, {
 var db = new Db("chat-io", server);
 
 function open(callback) {
-    db.open(function(err, db) {
-        db.authenticate("chat-io-admin", "pass", function(err, result) {
+    db.open(function (err, db) {
+        db.authenticate("chat-io-admin", "pass", function (err, result) {
             callback(err, db);
         });
     });
 }
-
-module.exports.login = function(credentials, callback) {
+module.exports.login = function (credentials, callback) {
     async.waterfall([
-    open,
+        open,
 
-    function(db, callback) {
+        function (db, callback) {
         db.collection("users", callback);
     },
 
-    function(collection, callback) {
+        function (collection, callback) {
         collection.find({
             username: credentials.username
         }).toArray(callback);
     },
 
-    function(items, callback) {
+        function (items, callback) {
         if (items.length === 0 || authenticate(credentials.password, items[0].salt, items[0].password)) {
             callback({
                 err: "Invalid username/password combination"
             });
-        }
-        else {
+        } else {
             var item = items[0];
             callback(null, {
                 username: item.username,
@@ -45,26 +43,24 @@ module.exports.login = function(credentials, callback) {
         }
     }],
 
-    function(err, result) {
+    function (err, result) {
         if (!err) {
             callback(result);
-        }
-        else {
+        } else {
             callback(err);
         }
         db.close();
     });
 };
-
-module.exports.register = function(credentials, callback) {
+module.exports.register = function (credentials, callback) {
     async.waterfall([
-    open,
+        open,
 
-    function(db, callback) {
+        function (db, callback) {
         db.collection("users", callback);
     },
 
-    function(collection, callback) {
+        function (collection, callback) {
         var hash = generatePassword(credentials.password);
         collection.insert({
             username: credentials.username,
@@ -74,8 +70,7 @@ module.exports.register = function(credentials, callback) {
         }, callback);
     },
 
-    function(items, callback) {
-
+        function (items, callback) {
         var item = items[0];
         callback({
             username: item.username,
@@ -83,11 +78,10 @@ module.exports.register = function(credentials, callback) {
         });
     }],
 
-    function(err, result) {
+    function (err, result) {
         if (!err) {
             callback(result);
-        }
-        else {
+        } else {
             callback(err);
         }
         db.close();

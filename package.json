@@ -10,6 +10,7 @@
     "jade": "*",
     "mongodb": "*",
     "socket.io": "*",
-    "async": "*"
+    "async": "*",
+    "mocha": "*"
   }
 }

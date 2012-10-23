@@ -1,102 +1,97 @@
 var mongo = require('mongodb'),
     Server = mongo.Server,
     Db = mongo.Db,
-    crypto = require('crypto');
+    crypto = require('crypto'),
+    async = require("async");
 var server = new Server("alex.mongohq.com", 10011, {
     safe: false
 });
 var db = new Db("chat-io", server);
 
-function open(success, error) {
+function open(callback) {
     db.open(function(err, db) {
         db.authenticate("chat-io-admin", "pass", function(err, result) {
-            if (!err) {
-                success(db);
-            }
-            else {
-                error(err);
-                db.close();
-            }
+            callback(err, db);
         });
     });
 }
 
 module.exports.login = function(credentials, callback) {
-    open(function(db) {
-        db.collection("users", function(err, collection) {
-            if (!err) {
-                collection.find({
-                    username: credentials.username
-                }).toArray(function(err, items) {
-                    if (!err) {
-                        if (items.length === 0 || authenticate(credentials.password, items[0].salt, items[0].password)) {
-                            callback({
-                                err: "Invalid username/password combination"
-                            });
-                        }
-                        else {
-                            var item = items[0];
-                            callback({
-                                username: item.username,
-                                email: item.email
-                            });
-                        }
-                        db.close();
-                    }
-                    else {
-                        callback(err);
-                        db.close();
-                    }
-                });
-            }
-            else {
-                callback(err);
-                db.close();
-            }
-        });
-    }, callback);
+    async.waterfall([
+    open,
+
+    function(db, callback) {
+        db.collection("users", callback);
+    },
+
+    function(collection, callback) {
+        collection.find({
+            username: credentials.username
+        }).toArray(callback);
+    },
+
+    function(items, callback) {
+        if (items.length === 0 || authenticate(credentials.password, items[0].salt, items[0].password)) {
+            callback({
+                err: "Invalid username/password combination"
+            });
+        }
+        else {
+            var item = items[0];
+            callback(null, {
+                username: item.username,
+                email: item.email
+            });
+        }
+    }],
+
+    function(err, result) {
+        if (!err) {
+            callback(result);
+        }
+        else {
+            callback(err);
+        }
+        db.close();
+    });
 };
 
 module.exports.register = function(credentials, callback) {
-    open(function(db) {
-        db.collection("users", function(err, collection) {
-            if (!err) {
-                collection.find({
-                    username: credentials.username
-                }).toArray(function(err, items) {
-                    if (!err) {
-                        var hash = generatePassword(credentials.password);
-                        collection.insert({
-                            username: credentials.username,
-                            password: hash.password,
-                            salt: hash.salt,
-                            email: credentials.email
-                        }, function(err, item) {
-                            if (!err) {
-                                item = item[0];
-                                callback({
-                                    username: item.username,
-                                    email: item.email
-                                });
-                            }
-                            else {
-                                callback(err);
-                            }
-                            db.close();
-                        });
-                    }
-                    else {
-                        callback(err);
-                        db.close();
-                    }
-                });
-            }
-            else {
-                callback(err);
-                db.close();
-            }
+    async.waterfall([
+    open,
+
+    function(db, callback) {
+        db.collection("users", callback);
+    },
+
+    function(collection, callback) {
+        var hash = generatePassword(credentials.password);
+        collection.insert({
+            username: credentials.username,
+            password: hash.password,
+            salt: hash.salt,
+            email: credentials.email
+        }, callback);
+    },
+
+    function(items, callback) {
+
+        var item = items[0];
+        callback({
+            username: item.username,
+            email: item.email
         });
-    }, callback);
+    }],
+
+    function(err, result) {
+        if (!err) {
+            callback(result);
+        }
+        else {
+            callback(err);
+        }
+        db.close();
+    });
 };
 
 function generatePassword(password) {

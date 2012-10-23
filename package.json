@@ -10,6 +10,6 @@
     "jade": "*",
     "mongodb": "*",
     "socket.io": "*",
-    "bcrypt": "*"
+    "async": "*"
   }
 }

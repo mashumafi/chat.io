@@ -1,6 +1,11 @@
+//https://github.com/LearnBoost/socket.io/wiki
+//http://socket.io/#how-to-use
+
 var chatdb = require('./chatdb');
 
+var g_io;
 module.exports = function(io) {
+    g_io = io;
     io.configure(function() {
         io.set('transports', ['xhr-polling']);
         io.set('log level', 1);
@@ -31,26 +36,28 @@ function connection(socket) {
     socket.on('message', message);
     socket.on('anything', anything);
     socket.on('disconnect', disconnect);
+    socket.join("room");
 }
 
 function connect() {
     // called if authorization callback succeeds
 }
 
-function error(reason) {
-    // called if authorization callback returns an exception
-}
-
-function anything(data) {
-    // event fired when anything happens besides reserved words
-}
-
-function message(message, callback) {
+function message(msg, callback) {
     // event fired when message recieved
+    g_io.sockets.in("room").emit('received', msg);
 }
 
 function disconnect() {
     // event fired whenever a user disconnects
+}
+
+function error(reason) {
+    // called if authorization callback returns an exception   
+}
+
+function anything(data) {
+    // event fired when anything happens besides reserved words
 }
 
 function login(credentials, callback) {

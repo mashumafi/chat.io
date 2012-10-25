@@ -1,0 +1,8 @@
+extends layout
+
+    script(src="http://code.jquery.com/qunit/qunit-git.js")
+    link(rel='stylesheet', href='http://code.jquery.com/qunit/qunit-git.css', type="text/css")
+    script
+        test( "hello test", function() {
+            ok(1 == "1", "Passed!");
+        });

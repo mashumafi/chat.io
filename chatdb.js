@@ -15,6 +15,29 @@ function open(callback) {
         });
     });
 }
+module.exports.seed = function (callback) {
+    async.forEach(["users"], remove, callback);
+};
+
+function remove(collectionName, callback) {
+    var p_db;
+    async.waterfall([
+        open,
+
+        function (db, callback) {
+        p_db = db;
+        db.collection(collectionName, callback);
+    },
+
+        function (collection, callback) {
+        collection.remove(callback);
+    }],
+
+    function (err, result) {
+        p_db.close();
+        callback(err);
+    });
+}
 module.exports.login = function (credentials, callback) {
     var p_db;
     async.waterfall([
@@ -46,12 +69,12 @@ module.exports.login = function (credentials, callback) {
     }],
 
     function (err, result) {
+        p_db.close();
         if (!err) {
             callback(result);
         } else {
             callback(err);
         }
-        p_db.close();
     });
 };
 module.exports.register = function (credentials, callback) {
@@ -71,7 +94,9 @@ module.exports.register = function (credentials, callback) {
             password: hash.password,
             salt: hash.salt,
             email: credentials.email
-        }, {safe:true}, callback);
+        }, {
+            safe: true
+        }, callback);
     },
 
         function (items, callback) {
@@ -83,12 +108,12 @@ module.exports.register = function (credentials, callback) {
     }],
 
     function (err, result) {
+        p_db.close();
         if (!err) {
             callback(result);
         } else {
             callback(err);
         }
-        p_db.close();
     });
 };
 

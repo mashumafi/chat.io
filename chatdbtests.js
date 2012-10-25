@@ -2,6 +2,11 @@ var chatdb = require('./chatdb'),
     mocha = require("mocha"),
     assert = require("assert");
 describe("Chat Db", function () {
+    describe("Clear database", function () {
+        it("should clear the database", function (done) {
+            chatdb.seed(done);
+        });
+    });
     describe("Register new account", function () {
         it("should create an account", function (done) {
             var credentials = {

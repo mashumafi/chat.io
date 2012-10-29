@@ -21,9 +21,9 @@ app.configure('development', function() {
     app.use(express.errorHandler());
 });
 
-app.get('/test/', function(req, res) {
+app.get('/test', function(req, res) {
     res.render('test', {
-    
+        title: 'chat.io'
     });
 });
 

@@ -1,6 +1,16 @@
 extends layout
 
 block content
+    span#menuBar.ui-widget-header.ui-corner-all
+        input(type="text", name="roomName")#roomName
+        button#room-join Join Room
+        button#logOff Log Off
+    #autoLogin.temp Auto Log In
+        br
+        button(style="margin-left:auto;margin-right:auto;")#mashumafi mashumafi
+        button(style="margin-left:auto;margin-right:auto;")#nagolyhprum nagolyhprum
+        button(style="margin-left:auto;margin-right:auto;")#schwowsers schwowsers
+
     form(name="loginForm")#login
         div Username:
         div
@@ -10,13 +20,14 @@ block content
         div
             input(type="password", name="passwordL")
         #passwordL.error
+        #authL.error
     form(name="registerForm")#register
         div Username:
         div
             input(type="text", name="usernameR")
         #usernameR.error
         div Password:
-        di
+        div
             input(type="password", name="passwordR")
         #passwordR.error
         div Confirm Password:
@@ -31,81 +42,3 @@ block content
         div
             input(type="text", name="emailCfmR")
         #emailCfmR.error
-
-    script(type="text/javascript")
-
-        var loginDialog;
-            $(window).resize(function() {/*
-                loginDialog.position({
-                    my: "center",
-                    at: "center",
-                    of: window
-                });
-            */});
-        var registerDialog;
-        
-        $(document).ready(function() {
-            loginDialog = $("#login").dialog({
-                resizable: false,
-                draggable: false,
-                title: "Log In",
-                dialogClass: "no-close-x",
-                buttons: {
-                    "Log In": function() {
-                        var credentials = {
-                            username: $("input[name=usernameL]").val(),
-                            password: $("input[name=passwordL]").val()
-                        };
-                        login(credentials, function(result) {
-                            $(".error").text("");
-                            if(result.err) {
-                                for(var err in result.err) {
-                                    $("#" + err + "L").text(result.err[err]);
-                                }
-                            } else {
-                                alert(result.username + result.email);
-                            }
-                        });
-                    },
-                    "Register": function(){
-                        loginDialog.dialog("close");
-                        loginDialog[0].reset();
-                        registerDialog.dialog("open");
-                    }
-                }
-            });
-
-            registerDialog = $("#register").dialog({
-                resizable: false,
-                draggable: false,
-                autoOpen: false,
-                title: "Register",
-                dialogClass: "no-close-x",
-                buttons: {
-                    "Submit": function() {
-                        var credentials = {
-                            username: $("input[name=usernameR]").val(),
-                            password: $("input[name=passwordR]").val(),
-                            passwordCfm: $("input[name=passwordCfmR]").val(),
-                            email: $("input[name=emailR]").val(),
-                            emailCfm: $("input[name=emailCfmR]").val()
-                        };
-                        register(credentials, function(result) {
-                            $(".error").text("");
-                            if(result.err) {
-                                for(var err in result.err){
-                                    $("#" + err + "R").text(result.err[err]);
-                                }
-                            } else {
-                                alert(result.username + result.email);
-                            }
-                        });
-                    },
-                    "Close": function() {
-                        registerDialog.dialog("close");
-                        registerDialog[0].reset();
-                        loginDialog.dialog("open");
-                    }
-                }
-            });
-        });

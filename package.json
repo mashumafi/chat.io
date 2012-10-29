@@ -11,6 +11,8 @@
     "mongodb": "*",
     "socket.io": "*",
     "async": "*",
-    "mocha": "*"
+    "mocha": "*",
+    "optimist": "*",
+    "mongoose": "*"
   }
 }

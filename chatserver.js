@@ -3,12 +3,11 @@
 
 var chatdb = require('./chatdb');
 
-var g_io;
+var g_chat, g_user;
 module.exports = function(io) {
-    g_io = io;
     io.configure(function() {
         io.set('transports', ['xhr-polling']);
-        io.set('log level', 1);
+        io.set('log level', 4);
     });
     io.set('authorization', function (handshakeData, callback) {
         /*handshakeData = {
@@ -24,51 +23,94 @@ module.exports = function(io) {
         // first argument is string or anything else
         callback(null, true); // error first callback style 
     });
-    io.sockets.on('connection', connection);
-    io.sockets.on('connect', connect);
-    io.sockets.on('error', error);
+    g_chat = io.of("/chat").on('connection', chatConnection);
+    g_user = io.of("/user").on("connection", userConnection);
 };
 
-function connection(socket) {
-    // event fired when someone connects
-    socket.on("login", login);
-    socket.on("register", register);
-    socket.on('message', message);
-    socket.on('anything', anything);
-    socket.on('disconnect', disconnect);
-    socket.join("room");
+function chatConnection(socket) {
+    socket.on("send", send).on("joinRoom", joinRoom).on("leaveRoom", leaveRoom);
 }
 
-function connect() {
-    // called if authorization callback succeeds
+function userConnection(socket) {
+    socket.on("login", login).on("register", register);
 }
 
-function message(msg, callback) {
-    // event fired when message recieved
-    g_io.sockets.in("room").emit('received', msg);
+/**
+ * Joins the data.room or a new room and sends the data to all connections in that room 
+ * (data.username will be added to this room)
+ */ 
+function send(data, callback) {
+    joinRoom.call(this, data.room, function(room) { 
+        data.room = room; 
+        if(data.username) {
+            var sid = g_user.clients(data.username);
+            if(sid.length) {
+                var socket = g_chat.socket(sid[0]);
+                if(socket) {
+                    socket.join(room);
+                }
+            }
+        }
+        g_chat.in(data.room).emit('receiver', data);
+        callback(data);
+    });
 }
 
-function disconnect() {
-    // event fired whenever a user disconnects
+/**
+ * Joins the specified room or creates a new one if none is specified, returns the room to the caller
+ */ 
+function joinRoom(room, callback) {
+    this.join((room = (room || new Date)));
+    callback(room);
 }
 
-function error(reason) {
-    // called if authorization callback returns an exception   
-}
-
-function anything(data) {
-    // event fired when anything happens besides reserved words
+function leaveRoom(room) {
+    this.leave(room);
 }
 
 function login(credentials, callback) {
-    if(validate(credentials, callback)) {
-        chatdb.login(credentials, callback);
+    if(validate(credentials, callback, false)) {
+        var me = this;
+        credentials.session = me.id;
+        chatdb.login(credentials, function(err, data) {
+            if(!err) {
+                me.join(data.username);
+                chatdb.listFriends({session:me.id}, function(err, friends) {
+                    if(!err) {
+                        data.friends = friends;
+                        callback(err, data);
+                        for(var i = 0; i < friends.length; i++) {
+                            var sid = g_user.clients(friends[i].username);
+                            if(sid.length) {
+                                var socket = g_user.socket(sid[0]);
+                                if(socket) {
+                                    socket.emit("onFriendLogin", data.username);
+                                    me.emit("onFriendLogin", friends[i].username);
+                                }
+                            }
+                            
+                        }
+                    } else {
+                        callback(err, friends);
+                    }
+                });
+            } else {
+                callback(err, data);
+            }
+        });
     }
 }
 
 function register(credentials, callback) {
     if(validate(credentials, callback, true)) {
-        chatdb.register(credentials, callback);
+        var me = this;
+        credentials.session = me.id;
+        chatdb.register(credentials, function(err, data) {
+            if(!err) {
+                me.join(data.username);
+            }
+            callback(err, data);
+        });
     }
 }
 
@@ -98,13 +140,13 @@ function validate(credentials, callback, isRegistering) {
         if(credentials.password !== credentials.passwordCfm) {
             err.passwordCfm = "Password must match.";
         }
-        if(!(/.+/).test(credentials.email)) { ////// [^@]+@[^\.]+\..+
+        if(!(/.+/).test(credentials.email)) { // [^@]+@[^\.]+\..+
             err.email = "Invalid email.";
         }
         delete credentials.emailCfm;
         delete credentials.passwordCfm;
     }
-    return Object.keys(err).length === 0 || callback({err : err});
+    return Object.keys(err).length === 0 || callback(err, null);
 }
 
 function hasSymbols(p) {

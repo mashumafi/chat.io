@@ -1,120 +1,177 @@
-var mongo = require('mongodb'),
-    Server = mongo.Server,
-    Db = mongo.Db,
-    crypto = require('crypto'),
-    async = require("async");
-var server = new Server("alex.mongohq.com", 10011, {
-    safe: true
-});
-var db = new Db("chat-io", server);
-
-function open(callback) {
-    db.open(function (err, db) {
-        db.authenticate("chat-io-admin", "pass", function (err, result) {
-            callback(err, db);
-        });
-    });
-}
+var crypto = require('crypto'),
+    async = require("async"),
+    mongoose = require("mongoose"),
+    Types = mongoose.Types,
+    ObjectId = Types.ObjectId,
+    models = require("./models"),
+    User = models.User;
 module.exports.seed = function (callback) {
-    async.forEach(["users"], remove, callback);
+    async.forEachSeries([User], remove, function () {
+        async.forEachSeries([{
+            username: "schwowsers",
+            password: "A#3edcde",
+            email: "fake2@fake.fake"
+        }, {
+            username: "nagolyhprum",
+            password: "Pa55word!",
+            email: "fake@fake.fake"
+        }], module.exports.register, function (err, res) {
+            callback(err, res);
+        })
+    });
 };
 
-function remove(collectionName, callback) {
-    var p_db;
+function remove(collection, callback) {
     async.waterfall([
-        open,
-
-        function (db, callback) {
-        p_db = db;
-        db.collection(collectionName, callback);
-    },
-
-        function (collection, callback) {
+        function (callback) {
         collection.remove(callback);
     }],
 
     function (err, result) {
-        p_db.close();
-        callback(err);
+        callback(err, result);
     });
 }
 module.exports.login = function (credentials, callback) {
-    var p_db;
-    async.waterfall([
-        open,
-
-        function (db, callback) {
-        p_db = db;
-        db.collection("users", callback);
-    },
-
-        function (collection, callback) {
-        collection.find({
-            username: credentials.username
-        }).toArray(callback);
-    },
-
-        function (items, callback) {
-        if (items.length === 0 || authenticate(credentials.password, items[0].salt, items[0].password)) {
+    User.findOne({
+        username: credentials.username
+    }, function (err, user) {
+        if (!user || authenticate(credentials.password, user.salt, user.password)) {
             callback({
-                err: "Invalid username/password combination"
+                auth: "Invalid username/password combination"
             });
         } else {
-            var item = items[0];
-            callback(null, {
-                username: item.username,
-                email: item.email
-            });
-        }
-    }],
-
-    function (err, result) {
-        p_db.close();
-        if (!err) {
-            callback(result);
-        } else {
-            callback(err);
+            login(user, callback);
         }
     });
 };
-module.exports.register = function (credentials, callback) {
-    var p_db;
-    async.waterfall([
-        open,
-
-        function (db, callback) {
-        p_db = db;
-        db.collection("users", callback);
-    },
-
-        function (collection, callback) {
-        var hash = generatePassword(credentials.password);
-        collection.insert({
-            username: credentials.username,
-            password: hash.password,
-            salt: hash.salt,
-            email: credentials.email
-        }, {
-            safe: true
-        }, callback);
-    },
-
-        function (items, callback) {
-        var item = items[0];
-        callback({
-            username: item.username,
-            email: item.email
+function login(user, callback) {
+    user.session = {
+        _id: new ObjectId,
+        started: new Date,
+        lastActivity: new Date,
+    };
+    user.save(function (err, user) {
+        callback(err, {
+            username: user.username,
+            email: user.email,
+            session: user.session._id
         });
-    }],
-
-    function (err, result) {
-        p_db.close();
-        if (!err) {
-            callback(result);
+    });
+}
+module.exports.register = function (credentials, callback) {
+    var hash = generatePassword(credentials.password);
+    User.create({
+        username: credentials.username,
+        password: hash.password,
+        salt: hash.salt,
+        email: credentials.email
+    }, function (err, user) {
+        if (err) {
+            callback(err, user);
         } else {
-            callback(err);
+            login(user, callback);
         }
     });
+};
+module.exports.addFriend = function (data, callback) {
+    async.parallel({
+        user: function (callback) {
+            User.findOne({
+                "session._id": data.session
+            }, callback);
+        },
+        friend: function (callback) {
+            User.findOne({
+                username: data.friend
+            }, callback)
+        }
+    },
+
+    function (err, result) {
+        if (!err) {
+            async.parallel([
+                function (callback) {
+                result.user.relationships.push({
+                    _id: result.friend._id,
+                    relationship: true,
+                    when: new Date
+                });
+                result.user.save(callback);
+            }, function (callback) {
+                result.friend.relationships.push({
+                    _id: result.user._id,
+                    relationship: null,
+                    when: new Date
+                });
+                result.friend.save(callback);
+            }], function (err, result) {
+                if (err) {
+                    callback(err, result);
+                } else {
+                    callback(err, [result[0][0]._id, result[1][0]._id]);
+                }
+            });
+        } else {
+            callback(err, result);
+        }
+    });
+};
+module.exports.listFriends = function (data, callback) {
+    User.findOne({
+        "session._id": data.session
+    }).populate('relationships._id', 'username').select("relationships._id").exec(function (err, user) {
+        async.map(user.relationships, function (item, callback) {
+            callback(err, item._id);
+        }, callback);
+    });
+};
+module.exports.removeFriend = function (data, callback) {
+    data.userid;
+    data.friend; // username
+    callback();
+};
+module.exports.blockUser = function (data, callback) {
+    async.parallel({
+        user: function (callback) {
+            User.findOne({
+                "session._id": data.session
+            }, callback);
+        },
+        enemy: function (callback) {
+            User.findOne({
+                username: data.enemy
+            }, callback)
+        }
+    },
+
+    function (err, result) {
+        if (!err) {
+            result.user.relationships.push({
+                _id: result.enemy._id,
+                relationship: false,
+                when: new Date
+            });
+            result.user.save(function (err) {
+                if (err) {
+                    callback(err, result);
+                } else {
+                    callback(err, [result.user._id, result.enemy._id]);
+                }
+            });
+        } else {
+            callback(err, result);
+        }
+    });
+};
+module.exports.unblockUser = function (data, callback) {
+    data.userid;
+    data.enemy; // username
+    callback();
+};
+module.exports.isBlockedUser = function (data, callback) {
+    data.userid;
+    data.enemy; // username
+    callback();
 };
 
 function generatePassword(password) {

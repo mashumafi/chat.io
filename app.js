@@ -33,6 +33,12 @@ app.get('/', function(req, res) {
     });
 });
 
+app.get('/mce', function(req, res) {
+    res.render('mce', {
+        title: 'chat.io'
+    });
+});
+
 var appServer = http.createServer(app);
 appServer.listen(app.get('port'), function() {
     console.log("Express server listening on port " + app.get('port'));

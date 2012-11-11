@@ -1,0 +1,21 @@
+Dan:
+1)  Adjust display elements on window resize
+2)  Restrict characters allowed in room names
+3)  Username and password length and character set errors display on log in screen 
+    if they are not met by the entered values
+4)  Log in / registration errors are not cleared from dialogs when they are closed
+5)  Make Log in and register dialogs modal
+6)  Prevent chat window from auto scrolling if user is viewing old messages
+7)  Prevent logging in / submitting registration form multiple times when the button
+	is pressed more than once
+8)  Make height of chat dialog's input and output elements adjustable
+9)  Switch from dialog buttons to normal JQuery UI buttons
+10) Add sound and/or make dialog blink upon receipt of message
+11) Thoroughly comment code.
+12) Fix shitty javascript programming.
+
+
+
+Matthew:
+1) Add last activity to friend's list
+2) create logout

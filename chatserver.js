@@ -3,11 +3,12 @@
 
 var chatdb = require('./chatdb');
 
-var g_chat, g_user;
+var g_io, g_chat, g_user, g_friends;
 module.exports = function(io) {
+    g_io = io;
     io.configure(function() {
         io.set('transports', ['xhr-polling']);
-        io.set('log level', 4);
+        io.set('log level', 2);
     });
     io.set('authorization', function (handshakeData, callback) {
         /*handshakeData = {
@@ -25,14 +26,106 @@ module.exports = function(io) {
     });
     g_chat = io.of("/chat").on('connection', chatConnection);
     g_user = io.of("/user").on("connection", userConnection);
+    g_friends = io.of("/friends").on("connection", friendsConnection);
 };
 
 function chatConnection(socket) {
-    socket.on("send", send).on("joinRoom", joinRoom).on("leaveRoom", leaveRoom);
+    socket
+        .on("send", send)
+        .on("joinRoom", joinRoom)
+        .on("leaveRoom", leaveRoom);
 }
 
 function userConnection(socket) {
-    socket.on("login", login).on("register", register);
+    socket
+        .on("login", login)
+        .on("register", register)
+        .on("disconnect", disconnect)
+        .on("addFriend", addFriend)
+        .on("blockUser", blockUser)
+        .on("unblockUser", unblockUser)
+        .on("removeFriend", removeFriend)
+        .on("logout", logout)
+        .on("denyFriend", denyFriend);
+}
+
+function denyFriend(data, callback) {
+    chatdb.denyFriend(data, callback);
+}
+
+function logout(callback) {
+    var data = {session:this.id};
+    sendStatus.call(this, "logout");
+    chatdb.logout(data, callback);
+}
+
+function friendsConnection(socket) {
+    socket
+        .on("sendStatus", sendStatus);
+}
+
+function disconnect() {
+    logout.call(this, function() {});
+}
+
+function addFriend(data, callback) {
+    data.session = this.id;
+    chatdb.addFriend(data, callback);
+    friendChange.call(this, data.username, "add", "join");
+}
+
+function blockUser(data, callback) {
+    data.session = this.id;
+    chatdb.blockUser(data, callback);
+    friendChange.call(this, data.username, "block", "leave");
+}
+
+function unblockUser(data, callback) {
+    data.session = this.id;
+    chatdb.unblockUser(data, callback);
+    friendChange.call(this, data.username, "unblock", false);
+}
+
+function removeFriend(data, callback) {
+    data.session = this.id;
+    chatdb.removeFriend(data, callback);
+    friendChange.call(this, data.username, "remove", "leave");
+}
+
+function getSocketUsername(socket) {
+    var usernames = g_io.sockets.manager.roomClients[socket.id]; //get the username associated with this socket
+    for(var i in usernames) {
+        if(i.indexOf("/user/") === 0) {
+            return i.replace("/user/", "");
+        }
+    }
+}
+
+function getSocketAsOther(socket, other) {
+    return other.socket(socket.id);
+}
+
+function friendChange(to, status, join_or_leave) {    
+    var username = getSocketUsername(this);
+    var other_socket = g_user.clients(to)[0]; //get the other users socket
+    if(other_socket && join_or_leave) { //if your friend is logged in
+        g_user.in(to).emit("friendChange", username, status); //tell your friend the change
+        getSocketAsOther(this, g_friends)[join_or_leave](username); //join or leave the room
+    }
+}
+
+function sendStatus(status) {
+    var username = getSocketUsername(this);
+    this.broadcast.to(username).emit("statusChange", username, status); //emit to all your friends
+}
+
+function print_r(r, t) {
+    var s = "";
+    t = t || "    ";
+    for(var i in r) {
+        s += t + i + " : " + r[i] + "\n";
+    }
+    return s;
 }
 
 /**
@@ -40,76 +133,79 @@ function userConnection(socket) {
  * (data.username will be added to this room)
  */ 
 function send(data, callback) {
-    joinRoom.call(this, data.room, function(room) { 
-        data.room = room; 
-        if(data.username) {
-            var sid = g_user.clients(data.username);
-            if(sid.length) {
-                var socket = g_chat.socket(sid[0]);
-                if(socket) {
-                    socket.join(room);
+    joinRoom.call(this, data.room, function(room) { //joins the specified chat room
+        data.from = getSocketUsername(this);
+        data.room = room; //this is the official room name
+        if(data.username) { //if this message is meant for a specific user name
+            var sid = g_user.clients(data.username); //get the user scope socket
+            if(sid.length) { //if there is a user socket
+                var socket = g_chat.socket(sid[0]); //get the chat scope socket
+                if(socket) { //if there is a chat scope socket
+                    socket.join(room); //make that socket join this chat
+                    console.log("        CONNECTED " + data.username + " AND " + data.from + " IN " + room + " ID : " + socket.id.id);
+                    console.log("    print_r : " + print_r(g_chat.manager.roomClients[socket.id]));
                 }
             }
         }
-        g_chat.in(data.room).emit('receiver', data);
+        console.log("    print_r : " + print_r(g_chat.manager.roomClients[this.id]));
+        g_chat.in(room).emit('receiver', data); //emit the data to all users in the room
         callback(data);
     });
 }
 
-/**
- * Joins the specified room or creates a new one if none is specified, returns the room to the caller
- */ 
 function joinRoom(room, callback) {
-    this.join((room = (room || new Date)));
-    callback(room);
+    this.join(room = (room || new Date().getTime())); //joins the specified room or creates a new one
+    callback.call(this, room); //passes the room name back to the caller
 }
 
 function leaveRoom(room) {
-    this.leave(room);
+    this.leave(room); //leave the specified chat room
 }
 
-function login(credentials, callback) {
-    if(validate(credentials, callback, false)) {
-        var me = this;
-        credentials.session = me.id;
-        chatdb.login(credentials, function(err, data) {
-            if(!err) {
-                me.join(data.username);
-                chatdb.listFriends({session:me.id}, function(err, friends) {
-                    if(!err) {
-                        data.friends = friends;
-                        callback(err, data);
-                        for(var i = 0; i < friends.length; i++) {
-                            var sid = g_user.clients(friends[i].username);
-                            if(sid.length) {
-                                var socket = g_user.socket(sid[0]);
-                                if(socket) {
-                                    socket.emit("onFriendLogin", data.username);
-                                    me.emit("onFriendLogin", friends[i].username);
+function login(credentials, callback) { //this is a user scoped socket
+    if(validate(credentials, callback, false)) { //if the login credentials are valid
+        var l_user = this, //refernece to this as a local user scoped socket
+            l_friend = g_friends.socket(credentials.session = this.id); //get this as a friend scoped socket, this socket id represents the session        
+        chatdb.login(credentials, function(err, data) { //login with these credentials
+            if(!err) { //if there is not an error
+                l_user.join(data.username); //join your personal user room
+                chatdb.listFriends({session:l_user.id}, function(err, users) { //get a list of your friends
+                    if(!err) { //if there was no error                  
+                        for(var i = 0; i < users.friends.length; i++) { //connect to all of your friends
+                            if(users.friends[i]._id) {
+                                var sid = g_user.clients(users.friends[i].username); //get your friends user scope socket
+                                if(sid.length) { //if that friend is logged in
+                                    var socket = g_friends.socket(sid[0]); //get your friends friend scope socket
+                                    if(socket) {
+                                        socket.join(data.username); //your friend joins your friend list
+                                        l_friend.join(users.friends[i].username); //you join your friend's friend list
+                                    }
                                 }
                             }
-                            
                         }
-                    } else {
-                        callback(err, friends);
+                        sendStatus.call(l_friend, "active");
+                        data.friends = users; //add the friends list to the data
+                        callback(err, data); //give the client all of the important data      
+                    } else { //if there was an error with listFriends
+                        callback(err, users);
                     }
                 });
-            } else {
+            } else { //if there was an error with login
                 callback(err, data);
             }
         });
     }
 }
 
-function register(credentials, callback) {
-    if(validate(credentials, callback, true)) {
-        var me = this;
-        credentials.session = me.id;
-        chatdb.register(credentials, function(err, data) {
-            if(!err) {
-                me.join(data.username);
+function register(credentials, callback) { //this is a user scoped socket
+    if(validate(credentials, callback, true)) { //if the registration credentials are valid
+        var me = this; //store a reference to this for later
+        credentials.session = me.id; //give the socket id as the session to the db     
+        chatdb.register(credentials, function(err, data) { //register the account
+            if(!err) { //if there was a not an error
+                me.join(data.username); //join a personal user room
             }
-            callback(err, data);
+            callback(err, data); //callback to the client
         });
     }
 }

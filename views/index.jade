@@ -5,40 +5,85 @@ block content
         input(type="text", name="roomName")#roomName
         button#room-join Join Room
         button#logOff Log Off
-    #autoLogin.temp Auto Log In
+
+    //- Friends / Blocked Lists
+    div#userLists
+        ul
+            li: a(href="#friendsList") Friends
+            li: a(href="#blockedList") Blocked
+            li#requestsTab: a(href="#friendRequests") R
+        div#friendsList
+            table.userListAdd
+                tr
+                    td(style="padding-right:5px;")
+                        input(type="text")#friend-name
+                    td
+                        button(text="Add friend")#friend-add Add
+            div.userListContainer
+                div#friends-online-label.userListLabel
+                    del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    |Online
+                    del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                div#friends-online
+                div#friends-offline-label.userListLabel
+                    del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    |Offline
+                    del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                div#friends-offline
+                div#friends-pending-label.userListLabel
+                    del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    |Pending
+                    del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                div#friends-pending
+        div#blockedList
+            table.userListAdd
+                tr
+                    td(style="padding-right:5px;")
+                        input(type="text")#blocked-name
+                    td
+                        button(text="Block user")#blocked-add Add
+            div.userListContainer
+                div#blocked-users-label.userListLabel
+                    del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    |Blocked
+                    del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                div#blocked-users
+        div#friendRequests
+                
+    //- Remove at end of project!
+    div#autoLogin.temp Auto Log In
         br
         button(style="margin-left:auto;margin-right:auto;")#mashumafi mashumafi
         button(style="margin-left:auto;margin-right:auto;")#nagolyhprum nagolyhprum
         button(style="margin-left:auto;margin-right:auto;")#schwowsers schwowsers
-
     form(name="loginForm")#login
         div Username:
         div
             input(type="text", name="usernameL")
-        #usernameL.error
+        div#usernameL.error
         div Password:
         div
             input(type="password", name="passwordL")
-        #passwordL.error
-        #authL.error
+        div#passwordL.error
+        div#authL.error
     form(name="registerForm")#register
         div Username:
         div
             input(type="text", name="usernameR")
-        #usernameR.error
+        div#usernameR.error
         div Password:
         div
             input(type="password", name="passwordR")
-        #passwordR.error
+        div#passwordR.error
         div Confirm Password:
         div 
             input(type="password", name="passwordCfmR")
-        #passwordCfmR.error
+        div#passwordCfmR.error
         div E-mail:
         div
             input(type="text", name="emailR")
-        #emailR.error
+        div#emailR.error
         div Confirm E-mail:
         div
             input(type="text", name="emailCfmR")
-        #emailCfmR.error
+        div#emailCfmR.error

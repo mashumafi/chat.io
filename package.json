@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node app"
+    "start": "node app --dbuser=user --dbpass=pass --dbserver=server --dbname=name --dbport=port"
   },
   "dependencies": {
     "express": "3.0.0rc4",

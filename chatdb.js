@@ -4,9 +4,10 @@ var crypto = require('crypto'),
     Types = mongoose.Types,
     ObjectId = Types.ObjectId,
     models = require("./models"),
-    User = models.User;
+    User = models.User,
+    Relationship = models.Relationship;
 module.exports.seed = function (callback) {
-    async.forEachSeries([User], remove, function () {
+    async.forEachSeries([User, Relationship], remove, function () {
         async.forEachSeries([{
             username: "schwowsers",
             password: "A#3edcde",
@@ -40,13 +41,14 @@ module.exports.login = function (credentials, callback) {
                 auth: "Invalid username/password combination"
             });
         } else {
-            login(user, callback);
+            login(credentials, user, callback);
         }
     });
 };
-function login(user, callback) {
+
+function login(credentials, user, callback) {
     user.session = {
-        _id: new ObjectId,
+        _id: credentials.session,
         started: new Date,
         lastActivity: new Date,
     };
@@ -69,11 +71,29 @@ module.exports.register = function (credentials, callback) {
         if (err) {
             callback(err, user);
         } else {
-            login(user, callback);
+            login(credentials, user, callback);
+        }
+    });
+};
+module.exports.logout = function (data, callback) {
+    User.findOne({
+        "session._id": data.session
+    }, function (err, user) {
+        if (!err && user && user.session) {
+            user.session._id = null;
+            user.session.started = null;
+            user.session.lastActivity = null
+            user.save(callback);
+        } else {
+            callback("Unexpected error!");
         }
     });
 };
 module.exports.addFriend = function (data, callback) {
+    addRelationship(true, data, callback);
+};
+
+function addRelationship(relationship, data, callback) {
     async.parallel({
         user: function (callback) {
             User.findOne({
@@ -82,96 +102,256 @@ module.exports.addFriend = function (data, callback) {
         },
         friend: function (callback) {
             User.findOne({
-                username: data.friend
+                username: data.username
             }, callback)
         }
     },
 
     function (err, result) {
-        if (!err) {
-            async.parallel([
-                function (callback) {
-                result.user.relationships.push({
-                    _id: result.friend._id,
-                    relationship: true,
+        if (!err && result.user && result.friend) {
+            if (ObjectId.toString(result.user._id) != ObjectId.toString(result.friend._id)) {
+                Relationship.update({
+                    owner: result.user._id,
+                    other: result.friend._id
+                }, {
+                    relationship: relationship,
                     when: new Date
+                }, {
+                    upsert: true
+                }, function (err) {
+                    if (err) {
+                        callback( !! err);
+                    } else {
+                        Relationship.findOne({
+                            owner: result.friend._id,
+                            other: result.user._id
+                        }, function (err, relationship) {
+                            if (err) {
+                                callback( !! err);
+                            } else {
+                                if (relationship && relationship.relationship) {
+                                    callback(null, {
+                                        _id: result.friend._id,
+                                        username: result.friend.username,
+                                        lastActivity: result.friend.session.lastActivity
+                                    });
+                                } else {
+                                    callback(null, false);
+                                }
+                            }
+                        });
+                    }
                 });
-                result.user.save(callback);
-            }, function (callback) {
-                result.friend.relationships.push({
-                    _id: result.user._id,
-                    relationship: null,
-                    when: new Date
-                });
-                result.friend.save(callback);
-            }], function (err, result) {
-                if (err) {
-                    callback(err, result);
-                } else {
-                    callback(err, [result[0][0]._id, result[1][0]._id]);
-                }
-            });
+            } else {
+                callback("You cannot add yourself");
+            }
         } else {
-            callback(err, result);
+            callback( !! err);
         }
     });
-};
+}
 module.exports.listFriends = function (data, callback) {
     User.findOne({
         "session._id": data.session
-    }).populate('relationships._id', 'username').select("relationships._id").exec(function (err, user) {
-        async.map(user.relationships, function (item, callback) {
-            callback(err, item._id);
-        }, callback);
+    }, function (err, user) {
+        async.parallel({
+            owner: function (callback) {
+                Relationship.find().where('owner').equals(user._id).sort({
+                    'other': 1
+                }).populate("other", 'username session.lastActivity').select('-_id other relationship').exec(callback);
+            },
+            other: function (callback) {
+                Relationship.find().where('other').equals(user._id).sort({
+                    'owner': 1
+                }).populate("owner", 'username session.lastActivity').select('-_id owner relationship').exec(callback);
+            }
+        }, function (err, results) {
+            if (!err) {
+                var ret = {
+                    friends: [],
+                    blocked: [],
+                    requests: []
+                };
+                var other, owner;
+                for (var i = 0, j = 0; i < results.owner.length; i++) {
+                    owner = results.owner[i];
+                    other = results.other[j];
+                    while (j < results.other.length && Object.toString(other.owner._id) < Object.toString(owner.other._id)) {
+                        /*if (other && other.relationship) {
+                            ret.requests.push(other.owner.username);
+                        }*/
+                        j++;
+                        other = results.other[j];
+                    }
+                    if (j < results.other.length) {
+                        if (Object.toString(other.owner._id) == Object.toString(owner.other._id) && owner.relationship && other.relationship) {
+                            // both are friends
+                            ret.friends.push({
+                                username: owner.other.username,
+                                _id: owner.other._id,
+                                lastActivity: owner.other.session.lastActivity
+                            });
+                            results.other.splice(j, 1);
+                        } else if (owner.relationship) {
+                            // unary friendship
+                            ret.friends.push({
+                                username: owner.other.username
+                            });
+                        } else {
+                            // blocked
+                            ret.blocked.push({
+                                username: owner.other.username
+                            });
+                        }
+                    } else {
+                        if (owner.relationship) {
+                            // unary friendship
+                            ret.friends.push({
+                                username: owner.other.username
+                            });
+                        } else {
+                            // blocked
+                            ret.blocked.push({
+                                username: owner.other.username
+                            });
+                        }
+                    }
+                }
+                var others = results.other;
+                for (var i = 0; i < others.length; i++) {
+                    if (others[i].relationship) {
+                        ret.requests.push({
+                            username: others[i].owner.username
+                        });
+                    }
+                }
+                callback(null, ret);
+            } else {
+                callback( !! err);
+            }
+        });
     });
 };
-module.exports.removeFriend = function (data, callback) {
-    data.userid;
-    data.friend; // username
-    callback();
-};
-module.exports.blockUser = function (data, callback) {
+
+function removeRelationship(data, callback) {
     async.parallel({
         user: function (callback) {
             User.findOne({
                 "session._id": data.session
             }, callback);
         },
-        enemy: function (callback) {
+        friend: function (callback) {
             User.findOne({
-                username: data.enemy
+                username: data.username
+            }, callback)
+        }
+    },
+
+    function (err, result) {
+        if (!err && result.user && result.friend) {
+            Relationship.find({
+                owner: result.user._id,
+                other: result.friend._id
+            }).remove(function (err, result) {
+                callback( !! err);
+            });
+        } else {
+            callback( !! err);
+        }
+    });
+}
+module.exports.removeFriend = function (data, callback) {
+    removeRelationship(data, callback);
+};
+module.exports.blockUser = function (data, callback) {
+    addRelationship(false, data, callback);
+};
+module.exports.unblockUser = function (data, callback) {
+    removeRelationship(data, callback);
+};
+module.exports.denyFriend = function (data, callback) {
+    async.parallel({
+        user: function (callback) {
+            User.findOne({
+                "session._id": data.session
+            }, callback);
+        },
+        friend: function (callback) {
+            User.findOne({
+                username: data.username
+            }, callback)
+        }
+    },
+
+    function (err, result) {
+        if (!err && result.user && result.friend) {
+            Relationship.find({
+                owner: result.friend._id,
+                other: result.user._id
+            }).remove(function (err, result) {
+                callback( !! err);
+            });
+        } else {
+            callback( !! err);
+        }
+    });
+};
+module.exports.isBlockedUser = function (data, callback) {
+    async.parallel({
+        user: function (callback) {
+            User.findOne({
+                "session._id": data.session
+            }, callback);
+        },
+        friend: function (callback) {
+            User.findOne({
+                username: data.username
             }, callback)
         }
     },
 
     function (err, result) {
         if (!err) {
-            result.user.relationships.push({
-                _id: result.enemy._id,
-                relationship: false,
-                when: new Date
-            });
-            result.user.save(function (err) {
-                if (err) {
-                    callback(err, result);
-                } else {
-                    callback(err, [result.user._id, result.enemy._id]);
-                }
+            Relationship.findOne({
+                owner: result.user._id,
+                other: result.friend._id
+            }, function (err, result) {
+                callback(err, result.relationship === false);
             });
         } else {
-            callback(err, result);
+            callback(err);
         }
     });
 };
-module.exports.unblockUser = function (data, callback) {
-    data.userid;
-    data.enemy; // username
-    callback();
-};
-module.exports.isBlockedUser = function (data, callback) {
-    data.userid;
-    data.enemy; // username
-    callback();
+module.exports.isFriend = function (data, callback) {
+    async.parallel({
+        user: function (callback) {
+            User.findOne({
+                "session._id": data.session
+            }, callback);
+        },
+        friend: function (callback) {
+            User.findOne({
+                username: data.username
+            }, callback)
+        }
+    },
+
+    function (err, result) {
+        if (!err) {
+            Relationship.find().or([{
+                owner: result.user._id,
+                other: result.friend._id
+            }, {
+                owner: result.friend._id,
+                other: result.user._id
+            }]).exec(function (err, result) {
+                callback(err, result && result.length === 2 && result[0].relationship && result[1].relationship);
+            });
+        } else {
+            callback(err);
+        }
+    });
 };
 
 function generatePassword(password) {
@@ -191,5 +371,5 @@ function makeSalt() {
 }
 
 function encryptPassword(salt, password) {
-    return crypto.createHmac('sha1', salt).update(password).digest('hex');
+    return crypto.createHmac('sha1', salt + "secret string").update(password + "super secret").digest('hex');
 }

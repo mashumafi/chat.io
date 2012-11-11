@@ -1,0 +1,199 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Client Tests</title>
+        <link type="text/css" rel="stylesheet" href="jasmine.css"/>
+        <script type="text/javascript" src="jasmine.js"></script>
+        <script type="text/javascript" src="jasmine-html.js"></script>
+        <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+        <script type="text/javascript" src="../chat.js"></script>        
+    </head>
+    <body>
+        <div id="jasmine">
+        </div>
+        <script type="text/javascript">
+            var wait = 5000;
+            describe("User", function() {
+                it("Will logout", function() {
+                    var completed = false;
+                    runs(function() {
+                        logout(function() {
+                            completed = true;
+                        });
+                    });
+                    waitsFor(function() {
+                        return completed;
+                    }, wait);
+                });
+                it("Login will be successful", function() {
+                    var credentials;
+                    runs(function() {
+                       login({
+                           username : "nagolyhprum",
+                           password : "Pa55word!"
+                       }, function(err, data) {
+                           credentials = true;
+                       });
+                    });
+                    waitsFor(function() {
+                        return credentials !== undefined;
+                    }, wait);
+                });
+                it("Register will callback", function() {
+                    var returned;
+                    runs(function() {
+                        register({
+                            username : "nagolyhprum",
+                            password : "Pa55word!",
+                            email : "fake@fake.com"
+                        }, function(err, data) {
+                            returned = err || data;
+                        });
+                    });
+                    waitsFor(function() {
+                        return returned;
+                    }, wait);
+                });
+            });
+            
+            describe("Rooms", function() {
+                    it("Will join a certain room", function() {
+                        var room;
+                        runs(function() {
+                            joinRoom("test", function(r) {
+                                room = r
+                            });
+                        });
+                        waitsFor(function() {
+                            return room !== undefined;
+                        }, wait);
+                    });
+                    it("Will join a random room", function() {
+                        var room;
+                        runs(function() {
+                            joinRoom("", function(r) {
+                                room = r;
+                            });
+                        });
+                        waitsFor(function() {
+                            return room !== undefined;
+                        }, wait);
+                    });
+                    it("Will leave a room", function() {
+                        leaveRoom("test");
+                    });
+            });
+            describe("Messages", function() {
+                it("Will send a message", function() {
+                    var data, r_data;
+                    runs(function() {
+                        send({
+                            message : "Hello world",
+                            username : "nagolyhprum"
+                        }, function(d) {
+                            data = d;
+                        });
+                        
+                    });
+                    receive = function(data) {
+                        r_data = data;
+                    };
+                    waitsFor(function() {
+                        return data !== undefined;
+                    }, wait);
+                    waitsFor(function() {
+                        return r_data !== undefined;
+                    }, wait);
+                });
+            });       
+            describe("Status Checks", function() {
+                it("Will send an idle status", function() {
+                    sendIdle();
+                });
+                it("Will send a status", function() {
+                    sendStatus("active");
+                    sendStatus("logout");
+                    sendStatus("idle");
+                });
+            });
+            describe("Friends", function() {
+                var completed = false;
+                beforeEach(function() {
+                    completed = false;
+                });
+                it("Will add a friend", function() {
+                    runs(function() {
+                        addFriend({
+                            username : "mashumafi"
+                        }, function(err, result) {
+                            completed = true;
+                        });
+                    });
+                    waitsFor(function() {
+                        return completed;
+                    }, wait);                    
+                });
+                it("Will remove a friend", function() {
+                    runs(function() {
+                        var data={username:"mashumafi"};
+                        removeFriend(data, function(err, result) {
+                            completed = true;
+                        });
+                    });
+                    waitsFor(function() {
+                        return completed;
+                    }, wait);                
+                });
+                it("Will block a user", function() {
+                    runs(function() {
+                            blockUser({
+                            username : "mashumafi"
+                        }, function(err, result) {
+                            completed = true;
+                        });
+                    });
+                    waitsFor(function() {
+                        return completed;
+                    }, wait);
+                    
+                });
+                it("Will unblock a user", function() {
+                    runs(function() {
+                            unblockUser({
+                            username : "mashumafi"
+                        }, function(err, result) {
+                            completed = true;
+                        });
+                    });
+                    waitsFor(function() {
+                        return completed;
+                    }, wait);
+                    
+                });
+            });
+            var receive = function() {
+            }, statusChange = function() {
+            }, friendChange = function() {
+            };
+            //extra
+            var jasmineEnv = jasmine.getEnv();
+            jasmineEnv.updateInterval = 250;
+            var htmlReporter = new jasmine.HtmlReporter();
+            jasmineEnv.addReporter(htmlReporter);
+            jasmineEnv.specFilter = function(spec) {
+                return htmlReporter.specFilter(spec);
+            };
+            var currentWindowOnload = window.onload;
+            window.onload = function() {
+                if (currentWindowOnload) {
+                    currentWindowOnload();
+                }            
+                document.getElementById('jasmine').innerHTML = jasmineEnv.versionString();
+                execJasmine();
+            };            
+            function execJasmine() {
+                jasmineEnv.execute();
+            }
+        </script>
+    </body>
+</html>

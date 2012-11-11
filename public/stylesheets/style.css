@@ -1,4 +1,8 @@
-.temp {
+body {
+    font: 100% "Lucida Grande", Helvetica, Arial, sans-serif;
+    background-image: url('../img/bkgd.png');
+}
+.temp { /* I forget what this was for */
     border: thin solid black;
     height: auto;
     width: 15em;
@@ -6,43 +10,83 @@
     background-color: #FCE872;
     text-align: center;
 }
-body {
-    padding: 50px;
-    font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-}
 a {
     color: #00B7FF;
 }
 #menuBar {
-    position: absolute;
+    height: 3em;
+    /*position: absolute;
     left: 0px;
-    top: 0px;
+    top: 0px;*/
 }
+/* Friend / Block List  */
+#userLists {
+    font-size: 0.9em;
+	width: 16em;
+}
+#userLists input{
+	width: 100%;
+	font-size: 0.8em;
+}
+.userListContainer {
+	border: thin solid #909090;
+	height: 25em;
+	overflow-x: hidden;
+	overflow-y: scroll;
+}
+.userListLabel {
+	text-align: center;
+	font-size: 0.8em;
+	padding: 0.4em 0;
+}
+.userListEntry {
+	font-size: 0.8em;
+	padding: 0.5em 1em;
+    cursor: pointer;
+}
+div.userListEntry:hover {
+	background-color: #fff6d4;
+}
+.userListAdd {
+    margin: auto;
+    width: 100%;
+}
+.active {
+	color: #000000;
+}
+.idle {
+	font-style: italic;
+}
+.offline {
+	color: #5e5e5e;
+}
+
 .error {
     color: red;
 }
 .no-close-x .ui-dialog-titlebar-close {
     display: none;
 }
-textarea {
-    resize: none;
-}
+.room {}  /* Empty.  Used to identify chat window. */
+
 .room-input {
-    margin-top: 1%;
-    word-wrap: break-word;
-    white-space: pre-wrap;
+    font-size: .75em;
+    margin-top: 5px;
     overflow: auto;
     width: 100%;
-    height: 39%;
+    height: 4em;
     border: thin solid #000000;
     background-color: #ffffff;
+    
 }
 .room-output {
     word-wrap: break-word;
     white-space: pre-wrap;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    font-size: .75em;
     width: 100%;
-    height: 60%;
+    height: 15em;
     border: thin solid #000000;
     background-color: #ffffff;
 }

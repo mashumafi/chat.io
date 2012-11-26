@@ -1,61 +1,86 @@
 extends layout
 
 block content
-    span#menuBar.ui-widget-header.ui-corner-all
-        input(type="text", name="roomName")#roomName
-        button#room-join Join Room
-        button#logOff Log Off
+    div#sideBarContainer
+        div#sideBar
+            table(style="margin:auto;")
+                tr
+                    td(colspan="2", style="text-align:center;font-size:2em;")
+                        | Chat.io
+                form
+                    tr
+                        td(style="font-size:.8em;width:9em;padding-right:5px;")
+                            input(type="text", name="roomName")#roomName
+                        td
+                            button(style="width:7em;")#room-join Join Room
+                form
+                    tr
+                        td(style="font-size:.8em;width:9em;padding-right:5px;")
+                            input(type="text", name="userName")#userName
+                        td
+                            button(style="width:7em;")#message-user Message
+                tr
+                    td(colspan="2")
+                        //- Friends / Blocked Lists
+                        div#userLists
+                            ul
+                                li: a(href="#friendsList")#friendsTabLink Friends
+                                li: a(href="#blockedList") Blocked
+                                li#requestsTab: a(href="#friendRequests") R
+                            div#friendsList
+                                form
+                                    table.userListAdd
+                                        tr
+                                            td(style="padding-right:5px;")
+                                                input(type="text")#friend-name
+                                            td
+                                                button(text="Add friend")#friend-add Add
+                                div.userListContainer.userListHeight
+                                    div#friends-online-label.userListLabel
+                                        del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                        |Online
+                                        del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    div#friends-online
+                                    div#friends-offline-label.userListLabel
+                                        del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                        |Offline
+                                        del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    div#friends-offline
+                                    div#friends-pending-label.userListLabel
+                                        del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                        |Pending
+                                        del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    div#friends-pending
+                            div#blockedList
+                                form
+                                    table.userListAdd
+                                        tr
+                                            td(style="padding-right:5px;")
+                                                input(type="text")#blocked-name
+                                            td
+                                                button(text="Block user")#blocked-add Add
+                                div.userListContainer.userListHeight
+                                    div#blocked-users-label.userListLabel
+                                        del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                        |Blocked
+                                        del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    div#blocked-users
+                            div#friendRequests
+                tr
+                    td(colspan="2")
+                        button(style="margin:auto;")#logOff Log Off
+    div#mainArea &nbsp;
+    div.clear
 
-    //- Friends / Blocked Lists
-    div#userLists
-        ul
-            li: a(href="#friendsList") Friends
-            li: a(href="#blockedList") Blocked
-            li#requestsTab: a(href="#friendRequests") R
-        div#friendsList
-            table.userListAdd
-                tr
-                    td(style="padding-right:5px;")
-                        input(type="text")#friend-name
-                    td
-                        button(text="Add friend")#friend-add Add
-            div.userListContainer
-                div#friends-online-label.userListLabel
-                    del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    |Online
-                    del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                div#friends-online
-                div#friends-offline-label.userListLabel
-                    del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    |Offline
-                    del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                div#friends-offline
-                div#friends-pending-label.userListLabel
-                    del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    |Pending
-                    del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                div#friends-pending
-        div#blockedList
-            table.userListAdd
-                tr
-                    td(style="padding-right:5px;")
-                        input(type="text")#blocked-name
-                    td
-                        button(text="Block user")#blocked-add Add
-            div.userListContainer
-                div#blocked-users-label.userListLabel
-                    del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    |Blocked
-                    del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                div#blocked-users
-        div#friendRequests
-                
     //- Remove at end of project!
     div#autoLogin.temp Auto Log In
         br
         button(style="margin-left:auto;margin-right:auto;")#mashumafi mashumafi
+        br
         button(style="margin-left:auto;margin-right:auto;")#nagolyhprum nagolyhprum
+        br
         button(style="margin-left:auto;margin-right:auto;")#schwowsers schwowsers
+
     form(name="loginForm")#login
         div Username:
         div
@@ -87,3 +112,6 @@ block content
         div
             input(type="text", name="emailCfmR")
         div#emailCfmR.error
+    div#mce_container(style="display:none;")    
+        textarea#mce
+    #pallette

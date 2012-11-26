@@ -6,6 +6,11 @@ var crypto = require('crypto'),
     models = require("./models"),
     User = models.User,
     Relationship = models.Relationship;
+/**
+ * Initialize the database for testing
+ * @param {Function} callback the function that is called when everything is finsihed
+ * @returns
+ */
 module.exports.seed = function (callback) {
     async.forEachSeries([User, Relationship], remove, function () {
         async.forEachSeries([{
@@ -21,7 +26,11 @@ module.exports.seed = function (callback) {
         })
     });
 };
-
+/**
+ * @collection {Model} collection the collection to remove
+ * @param {function} callback the function that is called when everything is finsihed
+ * @returns
+ */
 function remove(collection, callback) {
     async.waterfall([
         function (callback) {
@@ -32,6 +41,12 @@ function remove(collection, callback) {
         callback(err, result);
     });
 }
+/**
+ * The external login function
+ * @param {Object} credentials details used to login
+ * @param {Function} callback the function that is called when everything is finsihed
+ * @returns
+ */
 module.exports.login = function (credentials, callback) {
     User.findOne({
         username: credentials.username
@@ -45,7 +60,14 @@ module.exports.login = function (credentials, callback) {
         }
     });
 };
-
+/**
+ * Logs a user into chat
+ * @param {Object} credentials the details the user provided for login/registration
+ * @param {Object} user the user from the database
+ * @param {Function} callback the function that is called when everything is finsihed
+ * @returns callback(err, res) if it succeeds the callback is passed to login
+ * @see login()
+ */
 function login(credentials, user, callback) {
     user.session = {
         _id: credentials.session,
@@ -60,6 +82,13 @@ function login(credentials, user, callback) {
         });
     });
 }
+/**
+ * Registers a new user and logs them in
+ * @param {Object} credentials the details the user provided for registration
+ * @param {Function} callback the function that is called when everything is finsihed
+ * @returns callback(err, res) if it succeeds the callback is passed to login
+ * @see login()
+ */
 module.exports.register = function (credentials, callback) {
     var hash = generatePassword(credentials.password);
     User.create({
@@ -75,6 +104,10 @@ module.exports.register = function (credentials, callback) {
         }
     });
 };
+/**
+ * @param {Object} data contains session of current user
+ * @param {Function} callback the function that is called when everything is finsihed
+ */
 module.exports.logout = function (data, callback) {
     User.findOne({
         "session._id": data.session
@@ -89,10 +122,20 @@ module.exports.logout = function (data, callback) {
         }
     });
 };
+/**
+ * @param {Object} data contains session of current user and username of the friend to add
+ * @param {Function} callback the function that is called when everything is finsihed
+ * @returns callback(err, res) res will contain details of relation if mutual friends
+ */
 module.exports.addFriend = function (data, callback) {
     addRelationship(true, data, callback);
 };
-
+/**
+ * @param {Boolean} relationship whether to block or friend someone
+ * @param {Object} data contains session of current user and username of relation to add
+ * @param {Function} callback the function that is called when everything is finsihed
+ * @returns callback(err, res) res will contain details of relation if mutual friends
+ */
 function addRelationship(relationship, data, callback) {
     async.parallel({
         user: function (callback) {
@@ -150,6 +193,11 @@ function addRelationship(relationship, data, callback) {
         }
     });
 }
+/**
+ * @param {Object} data contains session of current user
+ * @param {Function} callback the function that is called when everything is finsihed
+ * @returns callback(err, res) where res is {Object} with friends, blocked and request {Array}
+ */
 module.exports.listFriends = function (data, callback) {
     User.findOne({
         "session._id": data.session
@@ -232,7 +280,11 @@ module.exports.listFriends = function (data, callback) {
         });
     });
 };
-
+/**
+ * @param {Object} data contains session of current user and username of the user unrelate
+ * @param {function} callback the function that is called when everything is finsihed
+ * @returns callback(err, res) if err is false then it succeeded
+ */
 function removeRelationship(data, callback) {
     async.parallel({
         user: function (callback) {
@@ -260,15 +312,35 @@ function removeRelationship(data, callback) {
         }
     });
 }
+/**
+ * @param {Object} data contains session of current user and username of the user to defriend
+ * @param {Function} callback the function that is called when everything is finsihed
+ * @returns callback(err, res) if err is false then it succeeded
+ */
 module.exports.removeFriend = function (data, callback) {
     removeRelationship(data, callback);
 };
+/**
+ * @param {Object} data contains session of current user and username of the user to block
+ * @param {Function} callback the function that is called when everything is finsihed
+ * @returns callback(err, res) if err is false then it succeeded
+ */
 module.exports.blockUser = function (data, callback) {
     addRelationship(false, data, callback);
 };
+/**
+ * @param {Object} data contains session of current user and username of the user to unblock
+ * @param {Function} callback the function that is called when everything is finsihed
+ * @returns callback(err, res) if err is false then it succeeded
+ */
 module.exports.unblockUser = function (data, callback) {
     removeRelationship(data, callback);
 };
+/**
+ * @param {Object} data contains session of current user and username of the user to deny
+ * @param {Function} callback the function that is called when everything is finsihed
+ * @returns callback(err, res) if err is false then it succeeded
+ */
 module.exports.denyFriend = function (data, callback) {
     async.parallel({
         user: function (callback) {
@@ -296,6 +368,11 @@ module.exports.denyFriend = function (data, callback) {
         }
     });
 };
+/**
+ * @param {Object} data contains session of current user and username of the blocked user
+ * @param {Function} callback the function that is called when everything is finsihed
+ * @returns callback(err, res) where res is true if they are blocked by the 
+ */
 module.exports.isBlockedUser = function (data, callback) {
     async.parallel({
         user: function (callback) {
@@ -323,6 +400,11 @@ module.exports.isBlockedUser = function (data, callback) {
         }
     });
 };
+/**
+ * @param {Object} data contains session of current user and username of the friend
+ * @param {Function} callback the function that is called when everything is finsihed
+ * @returns callback(err, res) if res is true then they are friends
+ */
 module.exports.isFriend = function (data, callback) {
     async.parallel({
         user: function (callback) {
@@ -353,7 +435,10 @@ module.exports.isFriend = function (data, callback) {
         }
     });
 };
-
+/**
+ * @param {String} password the password to be hashed with salt
+ * @returns {Object} contains the hashed password and the salt used
+ */
 function generatePassword(password) {
     var salt = makeSalt();
     return {
@@ -361,15 +446,26 @@ function generatePassword(password) {
         salt: salt
     };
 }
-
+/**
+ * @param {String} password this is the value a user types
+ * @param {String} salt this is the encryption used, must be stored
+ * @param {String} hashed_password this is the stored encrypted password
+ * @returns {Boolean} whether the password is valid
+ */
 function authenticate(password, salt, hashed_password) {
     return encryptPassword(password, salt) === hashed_password;
 }
-
+/**
+ * @returns {String} a random String for encryption
+ */
 function makeSalt() {
     return Math.round((new Date().valueOf() * Math.random())) + '';
 }
-
+/**
+ * @param {String} salt the encryption for the passpwrd
+ * @param {String} password the password to encrypt
+ * @returns a hashed password
+ */
 function encryptPassword(salt, password) {
     return crypto.createHmac('sha1', salt + "secret string").update(password + "super secret").digest('hex');
 }

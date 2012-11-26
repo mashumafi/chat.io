@@ -1,5 +1,5 @@
 var timeout, 
-    TIME_BEFORE_IDLE = 30000, // 30 seconds before idling
+    TIME_BEFORE_IDLE = 1000 * 60, // 60 seconds before idling
     status; 
     
 var surl = "http://chat_io.mashumafi.c9.io/",
@@ -8,16 +8,19 @@ var surl = "http://chat_io.mashumafi.c9.io/",
     friends = io.connect(surl + "friends");        
 
 chat.on("receiver", function(data) {
+    console.info(data.from + " sent the message '" + data.msg + "' to " + data.username + " using the room " + data.room);
     receive(data);
 });
 
 //status = active, idle, logout
 friends.on("statusChange", function(username, status) {
+    console.info(username + "'s status changed to " + status);
     statusChange(username, status);
 });
   
 //status = add, block, unblock, remove  
 user.on("friendChange", function(username, status) {
+    console.info(username + " changed their friend status to " + status);
     friendChange(username, status);
 });
 
@@ -105,3 +108,14 @@ function logout(callback) {
     clearTimeout(timeout);
     user.emit("logout", callback);
 }
+
+function getUsersInRoom(room, callback) {
+    chat.emit("getUsersInRoom", room, function(users) {
+        callback(users);
+    });
+}
+
+chat.on("userJoinsLeaves", function(username, joins_or_leaves, room) {
+    console.log("The user " + username + " " + joins_or_leaves + " the room " + room);
+    userJoinsLeaves(username, joins_or_leaves, room); 
+});

@@ -3,7 +3,7 @@
 
 var chatdb = require('./chatdb');
 
-var g_io, g_chat, g_user, g_friends;
+var g_io, g_chat, g_user, g_friends, g_canvas;
 module.exports = function(io) {
     g_io = io;
     io.configure(function() {
@@ -27,13 +27,15 @@ module.exports = function(io) {
     g_chat = io.of("/chat").on('connection', chatConnection);
     g_user = io.of("/user").on("connection", userConnection);
     g_friends = io.of("/friends").on("connection", friendsConnection);
+    g_canvas = io.of("/canvas").on("connection", canvasConnection)
 };
 
 function chatConnection(socket) {
     socket
         .on("send", send)
         .on("joinRoom", joinRoom)
-        .on("leaveRoom", leaveRoom);
+        .on("leaveRoom", leaveRoom)
+        .on("getUsersInRoom", getUsersInRoom);
 }
 
 function userConnection(socket) {
@@ -49,7 +51,19 @@ function userConnection(socket) {
         .on("denyFriend", denyFriend);
 }
 
+function canvasConnection(socket) {
+    socket.on("updateCanvas", function(data) {
+        g_canvas.in(data.room).emit("updateCanvas", data);
+    });
+    socket.on("joinCanvas", function(room, callback) {
+        g_canvas.in(room).emit("requestCanvas", room);
+        this.join(room);
+        callback();
+    });
+}
+
 function denyFriend(data, callback) {
+    data.session = this.id;
     chatdb.denyFriend(data, callback);
 }
 
@@ -105,25 +119,48 @@ function getSocketAsOther(socket, other) {
     return other.socket(socket.id);
 }
 
+function getUsersInRoom(room, callback) {
+    var users = g_chat.clients(room);
+    console.info("Getting users from room " + room + " : " + users.length);
+    for(var i = 0; users && i < users.length; i++) {
+        users[i] = getSocketUsername(g_user.socket(users[i].id));
+    }
+    callback(users);
+}
+
 function friendChange(to, status, join_or_leave) {    
     var username = getSocketUsername(this);
     var other_socket = g_user.clients(to)[0]; //get the other users socket
     if(other_socket && join_or_leave) { //if your friend is logged in
         g_user.in(to).emit("friendChange", username, status); //tell your friend the change
-        getSocketAsOther(this, g_friends)[join_or_leave](username); //join or leave the room
+        getSocketAsOther(this, g_friends)[join_or_leave](to); //join or leave the room
+        //getSocketAsOther(other_socket, g_friends)[join_or_leave](username);
+        console.info(username + " changed their friend status to " + status + " with " + to + " : " + join_or_leave);
     }
 }
 
 function sendStatus(status) {
     var username = getSocketUsername(this);
-    this.broadcast.to(username).emit("statusChange", username, status); //emit to all your friends
+    this.broadcast.to(username).emit("statusChange", username, status); //emit to all your friends    
+    var clients = g_friends.clients(username);    
+    var s = status + " sent to clients in room /friends/" + username;
+    for(var i in clients) {
+        s += "\n    " + getSocketUsername(g_friends.socket(clients[i].id));
+    }
+    console.info(s);
 }
 
 function print_r(r, t) {
-    var s = "";
+    var s = "", to;
     t = t || "    ";
     for(var i in r) {
-        s += t + i + " : " + r[i] + "\n";
+        try {
+            to = typeof(r[i]);
+            if(to != "object" && to != "function") {
+                s += t + i + " : " + r[i] + "\n";
+            }
+        } catch(e) {
+        }
     }
     return s;
 }
@@ -139,26 +176,32 @@ function send(data, callback) {
         if(data.username) { //if this message is meant for a specific user name
             var sid = g_user.clients(data.username); //get the user scope socket
             if(sid.length) { //if there is a user socket
-                var socket = g_chat.socket(sid[0]); //get the chat scope socket
+                var socket = g_chat.socket(sid[0].id); //get the chat scope socket
                 if(socket) { //if there is a chat scope socket
-                    socket.join(room); //make that socket join this chat
-                    console.log("        CONNECTED " + data.username + " AND " + data.from + " IN " + room + " ID : " + socket.id.id);
-                    console.log("    print_r : " + print_r(g_chat.manager.roomClients[socket.id]));
+                    socket.join(room); //make that socket join this chat                    
                 }
             }
         }
-        console.log("    print_r : " + print_r(g_chat.manager.roomClients[this.id]));
         g_chat.in(room).emit('receiver', data); //emit the data to all users in the room
         callback(data);
+        
+        var clients = g_chat.clients(room);
+        var s = data.msg + " sent to clients to room /chat/" + room;
+        for(var i in clients) {
+            s += "\n    " + getSocketUsername(g_chat.socket(clients[i].id));
+        }
+        console.info(s);
     });
 }
 
 function joinRoom(room, callback) {
     this.join(room = (room || new Date().getTime())); //joins the specified room or creates a new one
+    g_chat.in(room).emit("userJoinsLeaves", getSocketUsername(this), "join", room);
     callback.call(this, room); //passes the room name back to the caller
 }
 
 function leaveRoom(room) {
+    g_chat.in(room).emit("userJoinsLeaves", getSocketUsername(this), "leave", room);
     this.leave(room); //leave the specified chat room
 }
 
@@ -175,7 +218,7 @@ function login(credentials, callback) { //this is a user scoped socket
                             if(users.friends[i]._id) {
                                 var sid = g_user.clients(users.friends[i].username); //get your friends user scope socket
                                 if(sid.length) { //if that friend is logged in
-                                    var socket = g_friends.socket(sid[0]); //get your friends friend scope socket
+                                    var socket = g_friends.socket(sid[0].id); //get your friends friend scope socket
                                     if(socket) {
                                         socket.join(data.username); //your friend joins your friend list
                                         l_friend.join(users.friends[i].username); //you join your friend's friend list

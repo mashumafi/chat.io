@@ -1,12 +1,68 @@
 var $loginDialog,
     $registerDialog,
-    $menuBar,
     $userLists,
     user_name;
-
+    
 $(document).ready(function () {
-    $menuBar = $("#menuBar").hide();
-    $userLists = $("#userLists").tabs().hide();
+    $("#room-join").button().click(function(event) {
+        event.preventDefault();
+        var rm = $("#roomName").attr("value"); 
+        $("#roomName").attr("value", "");
+        if(rm.length > 0 && $("#" + rm).length === 0) {
+            $(this).button("disable");
+            joinRoom(rm, function(rm) {
+                createDialog({room: rm}, send);
+                $("#room-join").button("enable");
+            });
+        }
+    });
+    $("#message-user").button().click(function(event) {
+        event.preventDefault();
+        var name = $("#userName").attr("value"); 
+        $("#userName").attr("value", "");
+        if(name.length > 0 && $("#" + name).length === 0) { //check if dialog between users exists
+            $(this).button("disable");
+            createDialog({
+                room: user_name + new Date().getTime() + gChatCount++,
+                username: name
+                }, send);
+            $(this).button("enable");
+        }
+    });
+    $("#logOff").button().click(function() {
+        $(this).button("disable");
+        logout(function() {
+            $("#logOff").button("disable");
+            //$(".room").dialog("destroy").remove();
+            toggleSideBar();
+            //$(".userListEntry").remove();
+            //$loginDialog.dialog("open");
+            //$("#autoLogin").show();
+            location.reload();
+        });
+    });
+    $("#friend-add").click(function(event) {
+        event.preventDefault();
+        var $inputBox = $("#friend-name"),
+            name = $inputBox.val();
+        if(name != null && name.length > 0) {
+            $inputBox.val("");
+            addNewFriend(name);
+        }
+    });
+    $("#blocked-add").click(function(event) {
+        event.preventDefault();
+        var $inputBox = $("#blocked-name"),
+            name = $inputBox.val();
+        if(name != null && name.length > 0) {
+            $inputBox.val("");
+            addNewBlockedUser(name);
+        }
+    });
+    
+    $userLists = $("#userLists").tabs();
+    
+    $("#sideBar").css("margin-left", -$("#sideBar").outerWidth());
     
     $loginDialog = $("#login").dialog({
         resizable: false,
@@ -18,11 +74,13 @@ $(document).ready(function () {
                 id: "login-login",
                 text: "Log In",
                 click: function () {
+                    $("#login-login").button("disable");
                     var credentials = {
                         username: $("input[name=usernameL]").val(),
                         password: $("input[name=passwordL]").val()
                     };
                     login(credentials, function (err, result) {
+                        $("#login-login").button("enable");
                         $(".error").text("");
                         if (err) {
                             for (var e in err) {
@@ -64,6 +122,7 @@ $(document).ready(function () {
                 id: "register-submit",
                 text: "Submit",
                 click: function () {
+                    $("#register-submit").button("disable");
                     var credentials = {
                         username: $("input[name=usernameR]").val(),
                         password: $("input[name=passwordR]").val(),
@@ -72,6 +131,7 @@ $(document).ready(function () {
                         emailCfm: $("input[name=emailCfmR]").val()
                     };
                     register(credentials, function (err, result) {
+                        $("#register-submit").button("enable");
                         $(".error").text("");
                         if (err) {
                             for (var e in err) {
@@ -99,47 +159,6 @@ $(document).ready(function () {
     $registerDialog.keypress(function(event) {
         if(event.which == 13) {
             $("#register-submit").click();
-        }
-    });
-    
-    $("#room-join").button().click(function() {
-        var rm = $("#roomName").attr("value"); 
-        $("#roomName").attr("value", "");
-        if(rm.length > 0)
-            joinRoom(rm, function(rm) {
-                createDialog({room: rm}, send);
-                /*send({
-                    room: rm,
-                    username: null,
-                    msg: "*** " + user + " has joined ***"
-                }, function(err) {});  */
-            });
-    });
-    $("#logOff").button().click(function() {
-        logout(function() {
-            /*$(".room").dialog("destroy").remove();
-            $menuBar.hide();
-            $userLists.hide();
-            $(".userListEntry").remove();
-            $loginDialog.dialog("open");
-            $("#autoLogin").show(); */
-            location.reload();
-        });
-    });
-    $("#friend-add").click(function() {
-        var $inputBox = $("#friend-name"),
-            name = $inputBox.val();
-        if(name != null && name.length > 0) {
-            $inputBox.val("");
-            addNewFriend(name);
-        }
-    });
-    $("#blocked-add").click(function() {
-        var $inputBox = $("#blocked-name"),
-            name = $inputBox.val();
-        if(name != null && name.length > 0) {
-            $inputBox.val("");
-            addNewBlockedUser(name);
         }
     });
     
@@ -174,10 +193,18 @@ function onLogin(userData) {
     if (userData.email) {
         user_name = userData.username;
         document.title = "chat.io - " + user_name;
+        //$("#friendRequests").css("height", $("#friendsList").css("height"));
         populateFriendsList(userData.friends.friends);
         populateBlockedList(userData.friends.blocked);
         populateFriendRequests(userData.friends.requests);
-        $menuBar.fadeIn();
-        $userLists.fadeIn();
+        toggleSideBar();
     }
 }
+
+function toggleSideBar() {
+    var $sideBar = $("#sideBar");
+    $sideBar.animate({
+        marginLeft: parseInt($sideBar.css("margin-left"), 10) == 0 ?
+            -$sideBar.outerWidth() : 0
+    });
+  }

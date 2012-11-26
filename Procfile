@@ -1,1 +1,1 @@
-web: node app.js
+web: node app.js --dbuser=chat-io-admin --dbpass=pass --dbserver=alex.mongohq.com --dbname=chat-io --dbport=10011

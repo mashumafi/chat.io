@@ -1,21 +1,25 @@
 var canvas = io.connect(surl + "canvas");
 
 $(function() {				
-	var pallette = $("#pallette").draggable(), colors = [
+	var pallette = $("#pallette"), colors = [
 		"black", "white", "gray", "lightgray", "red", "pink", 
 		"orange", "yellow", "green", "lightgreen", "blue", "lightblue"
 	];
+    var strHTML = "<div style='float:left;'>";
 	for(var i = 0; colors.length; i++) {
-		pallette.append("<div class='color' style='background:" + colors.shift() + "'></div>");					
-		if(colors.length % 2 == 0) {
-			pallette.append("<div class='newline'></div>");
+		strHTML += "<div class='color' style='background:" + colors.shift() + "'></div>";					
+		if(colors.length % 6 == 0) {
+			strHTML += "<div class='newline'></div>";
 		}
 	}
-	var color = $("<div id='color' style='background-color:black;'></div>");
-	pallette.append(color);
+    
+    pallette.append(strHTML + "</div><div id='color' style='float:left;background-color:black;'></div><div class='newline'></div>");
+    
+	var color = $("#color");
 	pallette.find(".color").click(function(e) {
 		color.css("background-color", $(e.target).css("background-color"));
 	});
+    
 });
 
 //CANVAS FUNCTIONS

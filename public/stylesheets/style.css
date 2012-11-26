@@ -5,7 +5,14 @@ html,body {
 }
 body {
     font: 100% "Lucida Grande", Helvetica, Arial, sans-serif;
-    background-color: #C8FFA6;
+    overflow: hidden;
+}
+#logo {
+    position: fixed;
+    left: 50%;
+    margin-left: -96px;
+    top:8%;
+    opacity: .4;
 }
 .temp { /* For Auto Login*/
     border: thin solid black;
@@ -30,9 +37,11 @@ a {
     height: 100%;
     width: 18em;
     background-color: #71A352;
+    position: relative;
+    z-index: 9000;
 }
 #sideBar td {
-    padding: 5px 0px;   
+    padding: 5px 0;   
 }
 #mainArea {
     margin-left: 18em;
@@ -58,6 +67,7 @@ a {
 }
 .userListContainer {
 	border: thin solid #909090;
+    background-color: #ffffff;
 	overflow-x: hidden;
 	overflow-y: scroll;
     cursor: default;
@@ -102,41 +112,58 @@ div.userListEntry:hover {
 .no-close-x .ui-dialog-titlebar-close {
     display: none;
 }
-.room {}  /* Empty.  Used to identify chat window. */
+.chat {}  /* Empty.  Used to identify chat window. */
+.chat p {
+    margin: 0px;
+}
 
-.room-panel {
-    float: left;
+.chat-left {
+    position: absolute !important;  
+    padding: 20px 10px 20px 20px;
 }
-.room-left {
-    margin-right: 10px;   
+.chat-middle {
+    width: 17em;
 }
-.room-canvas {
+.chat-right {
+    width: 11em;
+    position: absolute !important;
+    padding: 20px 20px 20px 10px;
+}
+.chat-right input {
+    width: 9em;
+    font-size: .7em;
+    padding: 5px;
+}
+.chat-right table {
+    margin: 10px auto 0;    
+}
+
+.chat-listHeight {
+    height: 14em;   
+}
+.chat-canvas {
+    margin: auto;
     width: 256px;
     height: 256px;
 }
-.room-middle {
-    width: 17em;
-}
-.room-input {
+.chat-input {
     font-size: .75em;
-    margin-top: 5px;
-    margin-bottom: 10px;
     overflow: auto;
-    width: 100%;
     height: 4em;
     border: thin solid #000000;
     background-color: #ffffff;
     
 }
-.room-output {
+.chat-output {
     word-wrap: break-word;
     white-space: pre-wrap;
     overflow-x: hidden;
     overflow-y: scroll;
-    font-size: .75em;
-    width: 100%;
-    height: 15em;
-    border: thin solid #000000;
+    font-size: .8em;
+    padding: 8px;
+    margin-bottom: 5px;
+    height: 13em;
+    border: thin solid #909090;
     background-color: #ffffff;
 }
 .sender {
@@ -147,10 +174,13 @@ div.userListEntry:hover {
     color: #0457DB;
     font-weight: bold;
 }
-.room-right {
-    width: 10em;
-    margin-left: 10px;
+.chat-toggle-left {
+    margin-left: 0;
 }
-.room-listHeight {
-    height: 17em;   
+.chat-toggle-right {
+    margin-right: 0;
+    margin-left: auto;
+}
+.chat-send {
+    margin: auto;
 }

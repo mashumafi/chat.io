@@ -1,16 +1,12 @@
-#pallette { 
-	width : 64px;
-	height : 254px;
-	position : fixed;
-	bottom : 5px;
-	right : 5px;
+#pallette {
+    width: 256px;
+    margin: 10px auto;
 	border : 1px solid black;	
     background : white;
-    z-index : 100000000000;
-    cursor : move;
+    border-radius : 4px;
 }
 
-#pallette, #pallette * {
+#color, .color{
 	border-radius : 4px;
 	margin : 5px;
 }
@@ -29,6 +25,6 @@
 
 #pallette #color {
 	width : 52px;
-	height : 50px;
-	border : 1px solid black;	
+	height : 52px;
+	border : 1px solid black;
 }

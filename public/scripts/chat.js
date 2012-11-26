@@ -2,7 +2,7 @@ var timeout,
     TIME_BEFORE_IDLE = 1000 * 60, // 60 seconds before idling
     status; 
     
-var surl = "http://chat_io.mashumafi.c9.io/",
+var surl = "/",
     user = io.connect(surl + "user"),
     chat = io.connect(surl + "chat"),
     friends = io.connect(surl + "friends");        

@@ -68,8 +68,21 @@ function denyFriend(data, callback) {
 }
 
 function logout(callback) {
-    var data = {session:this.id};
+    var data = {session:this.id}, 
+        username = getSocketUsername(this),
+        rooms = g_io.sockets.manager.roomClients[this.id], 
+        me_chat = getSocketAsOther(this, g_chat);
     sendStatus.call(this, "logout");
+    console.info("user is leaving rooms");
+    console.info("    " + username);
+    for(var i in rooms) {
+        if(i.indexOf("/chat/") === 0) {
+            i = i.substring(6);
+            console.info("    " + i);
+            leaveRoom.call(me_chat, i);
+        }
+    }
+    this.leave(username);
     chatdb.logout(data, callback);
 }
 
@@ -141,7 +154,7 @@ function friendChange(to, status, join_or_leave) {
 
 function sendStatus(status) {
     var username = getSocketUsername(this);
-    this.broadcast.to(username).emit("statusChange", username, status); //emit to all your friends    
+    g_friends.in(username).emit("statusChange", username, status); //emit to all your friends    
     var clients = g_friends.clients(username);    
     var s = status + " sent to clients in room /friends/" + username;
     for(var i in clients) {
@@ -178,7 +191,7 @@ function send(data, callback) {
             if(sid.length) { //if there is a user socket
                 var socket = g_chat.socket(sid[0].id); //get the chat scope socket
                 if(socket) { //if there is a chat scope socket
-                    socket.join(room); //make that socket join this chat                    
+                    joinRoom.call(socket, room, function(){}); //make that socket join this chat                    
                 }
             }
         }

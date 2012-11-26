@@ -32,13 +32,13 @@ $(document).ready(function () {
     $("#logOff").button().click(function() {
         $(this).button("disable");
         logout(function() {
-            $("#logOff").button("disable");
-            //$(".room").dialog("destroy").remove();
+            $("#logOff").button("enable");
+            $(".chat").dialog("destroy").remove();
             toggleSideBar();
-            //$(".userListEntry").remove();
-            //$loginDialog.dialog("open");
-            //$("#autoLogin").show();
-            location.reload();
+            $(".userListEntry").remove();
+            $loginDialog.dialog("open");
+            $("#autoLogin").show();
+            //location.reload();
         });
     });
     $("#friend-add").click(function(event) {

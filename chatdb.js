@@ -51,7 +51,7 @@ module.exports.login = function (credentials, callback) {
     User.findOne({
         username: credentials.username
     }, function (err, user) {
-        if (!user || authenticate(credentials.password, user.salt, user.password)) {
+        if (!user || !authenticate(credentials.password, user.salt, user.password)) {
             callback({
                 auth: "Invalid username/password combination"
             });
@@ -453,7 +453,7 @@ function generatePassword(password) {
  * @returns {Boolean} whether the password is valid
  */
 function authenticate(password, salt, hashed_password) {
-    return encryptPassword(password, salt) === hashed_password;
+    return encryptPassword(salt, password) === hashed_password;
 }
 /**
  * @returns {String} a random String for encryption

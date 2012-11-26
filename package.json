@@ -1,12 +1,12 @@
 {
   "name": "chat-io",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "private": true,
   "scripts": {
     "start": "node app --dbuser=user --dbpass=pass --dbserver=server --dbname=name --dbport=port"
   },
   "dependencies": {
-    "express": "3.0.0rc4",
+    "express": "*",
     "jade": "*",
     "mongodb": "*",
     "socket.io": "*",
@@ -14,5 +14,9 @@
     "mocha": "*",
     "optimist": "*",
     "mongoose": "*"
+  },
+  "engines": {
+    "node": "*",
+    "npm": "*"
   }
 }

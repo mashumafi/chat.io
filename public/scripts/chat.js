@@ -12,13 +12,13 @@ chat.on("receiver", function(data) {
     receive(data);
 });
 
-//status = active, idle, logout
+//status = active, idle, offline
 friends.on("statusChange", function(username, status) {
     console.info(username + "'s status changed to " + status);
     statusChange(username, status);
 });
   
-//status = add, block, unblock, remove  
+//status = add, remove, block, unblock
 user.on("friendChange", function(username, status) {
     console.info(username + " changed their friend status to " + status);
     friendChange(username, status);

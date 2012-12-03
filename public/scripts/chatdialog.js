@@ -2,15 +2,15 @@
  * Updates chat window user list when a user joins or leaves, and changes 
  * window title if needed.
  * @param {String} Username of user who joined or left the chat.
- * @param {String} Action taken by user.  Must be either "joins" or "leaves."
+ * @param {String} Action taken by user.  Must be either "join" or "leave."
  * @param {String} Name of room affected.
  **/
-function userJoinsLeaves(username, joins_or_leaves, room) {
-    if(joins_or_leaves === "join") {
+function userJoinsLeaves(username, join_or_leave, room) {
+    if(join_or_leave === "join") {
         insertUser(getNewListEntry({username:username}, "message, befriend, blockuser"),
             room + "_users");
     }
-    else if(joins_or_leaves === "leave") {
+    else if(join_or_leave === "leave") {
         $("#" + room + "_users").children("#u_" + username).remove();
     }
 }
@@ -43,7 +43,12 @@ function showInvite(username, room) {
         });
 }
 
-function receive(data) {    
+function receive(data) {
+    //If sender is blocked by recipient, ignore message.
+    if(isBlocked(data.from) >= 0) {
+        leaveRoom(data.room);
+        return;
+    }
     //Check that dialog for room message belongs to exists.  If not, make it. 
     if($("#" + data.room).length == 0) {
         if( data.from === user_name) //Receipient is author of message
@@ -84,12 +89,18 @@ function createDialog(info, callback) {
 		userList;
     
     //HTML for middle chat panel
-	chat = "<div id='" + info.room + "_middle' class='chat-middle'><div id='" + info.room 
-		+ "_output' class='chat-output'></div><textarea id='" + info.room 
-		+ "_input' class='chat-input'></textarea><button type='button' id='" 
-		+ info.room + "_toggle_left'>&lt;</button><button type='button' id='" 
-		+ info.room + "_send'>Send</button><button type='button' id='" 
-		+ info.room + "_toggle_right'>&gt;</button></div></div>";
+	chat = "<div id='" + info.room + "_middle' class='chat-middle'>\
+                <div id='" + info.room + "_output' class='chat-output'></div>\
+                <textarea id='" + info.room + "_input' class='chat-input'></textarea>\
+                <div style='position:relative;margin-top:10px;'>\
+                    <button type='button' id='" + info.room 
+                        + "_send' style='display:block;margin:auto;'>Send</button>\
+                    <button type='button' id='" + info.room 
+                        + "_toggle_left' style='position:absolute;left:10px;top:0;'>&lt;</button>\
+                    <button type='button' id='" + info.room 
+                        + "_toggle_right' style='position:absolute;right:10px;top:0;'>&gt;</button>\
+                </div>\
+            </div>";
 	
 	$content = $("<div id='" + info.room + "' class='chat'>" + chat + "</div>");
 		
@@ -127,14 +138,30 @@ function createDialog(info, callback) {
 	});
     
     //HTML for left canvas panel
-	canvas = "<div id='" + info.room + "_left' class='chat-left ui-widget ui-widget-content ui-corner-left'><div id='" 
-		+ info.room + "_canvas' class='chat-canvas'></div></div>"; //Probably don't need inner div
+	canvas =    "<div id='" + info.room + "_left' class='chat-left ui-widget ui-widget-content ui-corner-left'>\
+                    <h5 style='text-align:center;margin:10px;'>Group Canvas</h5>\
+                    <div id='" + info.room + "_canvas' class='chat-canvas'></div>\
+                </div>";
 	
     //HTML for right user list panel
-	userList = "<div id='" + info.room + "_right' class='chat-right ui-widget ui-widget-content ui-corner-right'>" 
-		+ "<div class='userListContainer chat-listHeight'><div class='userListLabel'>Participants</div><div id='" 
-		+ info.room + "_users'></div></div><form><table><tr><td><input type='text'/></td><td><button id='" 
-        + info.room + "_invite'>Invite</button></td></tr></table></form></div>";
+	userList =  "<div id='" + info.room + "_right' class='chat-right ui-widget ui-widget-content ui-corner-right'>\
+                    <h5 style='text-align:center;margin:10px;'>Users in Room</h5>\
+                    <div class='userListContainer chat-listHeight'>\
+                        <div id='" + info.room + "_users'></div>\
+                    </div>\
+                    <form>\
+                        <table>\
+                            <tr>\
+                                <td>\
+                                    <input type='text'/>\
+                                </td>\
+                                <td>\
+                                    <button id='" + info.room + "_invite'>Invite</button>\
+                                </td>\
+                            </tr>\
+                        </table>\
+                    </form>\
+                </div>";
     
     $parent = $content.parent().append(canvas + userList).css("overflow", "visible");
 	
@@ -168,7 +195,7 @@ function createDialog(info, callback) {
                     room: info.room,
                     username: $(this).prev().val(),
                     msg: ""
-                }
+                };
             $(this).prev().val("");
             send(message, function(err) {});
         });
@@ -182,7 +209,7 @@ function createDialog(info, callback) {
     //Add canvas to left drawing panel
     getCanvas({
         width: 32, 
-        height: 32, 
+        height: 40, 
         room: info.room    
         }, function(cvs) {
 			cvs.css({width: "100%", height: "100%"});
@@ -194,15 +221,6 @@ function createDialog(info, callback) {
         .hide();
     $("#" + info.room + "_right").css({"left":width, "top":"0px", "bottom":"0px"})
         .hide();
-	
-    //Set send button activate if 'enter' is pressed while input area is focused.
-    //If shift is held while pressing enter, it acts as a newline.
-    /*$("#" + info.room + "_tinymce").keypress( function(event) {
-        if(event.which == 13 && !event.shiftKey) {
-            event.preventDefault();
-            $("#" + info.room + "_send").click();
-        }
-    });*/
 	
 	$content.dialog("open");
 }

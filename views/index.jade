@@ -5,14 +5,14 @@ block content
         div#sideBar
 
             table(style="margin:auto;")
-                form
-                    tr
+                tr
+                    form
                         td(style="font-size:.7em;width:9em;padding-right:5px;")
                             input(type="text", name="roomName")#roomName
                         td
                             button(style="width:7em;")#room-join Join Room
-                form
-                    tr
+                tr
+                    form
                         td(style="font-size:.7em;width:9em;padding-right:5px;")
                             input(type="text", name="userName")#userName
                         td
@@ -63,6 +63,8 @@ block content
                             del &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         div#blocked-users
                 div#friendRequests
+                    h5(style="margin-top:5px;margin-bottom:10px;text-align:center;") Friend Requests:
+                    div#friend-requests.userListContainer.userListHeight
             div#pallette
             button(style="display:block;margin:auto;")#logOff Log Off
     div#mainArea &nbsp;
@@ -81,12 +83,10 @@ block content
         div Username:
         div
             input(type="text", name="usernameL")
-        div#usernameL.error
         div Password:
         div
             input(type="password", name="passwordL")
-        div#passwordL.error
-        div#authL.error
+        div#loginError.error &nbsp;
     form(name="registerForm")#register
         div Username:
         div

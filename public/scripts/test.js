@@ -1,6 +1,7 @@
     var $friendsOnline,
         $friendsOffline,
         $friendsPending,
+        TIME_BEFORE_IDLE = 1000 * 60,
         user_name = "tester";
 
 module("populateFriendsList()", {
@@ -13,7 +14,7 @@ module("populateFriendsList()", {
 });
 test("Should handle null friends array", function () {    
     var list = null;
-    populateFriendsList(list);
+    populateFriendsList(list, TIME_BEFORE_IDLE);
     ok($friendsOnline.children().length == 0, "Handles null friends array.");
 });
 test("Should handle undefined friends array", function() {
@@ -29,10 +30,10 @@ test("Should handle shuffled filled array in alphabetical order", function() {
     expect(2);
     
     var list = getList(5, 5, 4, 4);
-    populateFriendsList(list);
-    ok($friendsOnline.children().length == 10 
+    populateFriendsList(list, TIME_BEFORE_IDLE);
+    ok($friendsOnline.children().length ==  5 + 5 
         && $friendsOffline.children().length == 4 
-        && $friendsOffline.children().length == 4, 
+        && $friendsPending.children().length == 4, 
         "Handles filled friends array.");
     
     //Check that it adds online items in alphabetical order
@@ -69,34 +70,40 @@ test("Should handle shuffled filled array in alphabetical order", function() {
     ok(isSorted, "Adds items in alphabetical order.")
 });
 
-module("getNewListEntry()");
-test("Should create correct user objects", function() {
-    expect(5);
-    var $user = getNewListEntry({
+
+
+module("getNewFriendEntry()");
+test("Should create correct friend list objects", function() {
+    expect(4);
+    var $user = getNewFriendEntry({
         _id: 1,
         username: "Active",
         lastActivity: new Date()
-    }, "friend");    
-    ok($user.attr("id") === "f_Active" && $user.hasClass("active"), "Created active object.");  
-    $user = getNewListEntry({
+    }, TIME_BEFORE_IDLE);    
+    ok($user.attr("id").substring(2) === "Active" && $user.hasClass("active"), "Created active object.");  
+    $user = getNewFriendEntry({
         _id: 1,
         username: "Idle",
         lastActivity: new Date(1)
-    }, "friend");    
-    ok($user.attr("id") === "f_Idle" && $user.hasClass("idle"), "Created idle object.");
-    $user = getNewListEntry({
+    }, TIME_BEFORE_IDLE);    
+    ok($user.attr("id").substring(2) === "Idle" && $user.hasClass("idle"), "Created idle object.");
+    $user = getNewFriendEntry({
         _id: 1,
         username: "Offline",
-    }, "friend");    
-    ok($user.attr("id") === "f_Offline" && $user.hasClass("offline"), "Created offline object.");
-    $user = getNewListEntry({
+    }, TIME_BEFORE_IDLE);    
+    ok($user.attr("id").substring(2) === "Offline" && $user.hasClass("offline"), "Created offline object.");
+    $user = getNewFriendEntry({
         username: "Pending"
-    }, "friend");    
-    ok($user.attr("id") === "f_Pending" && $user.hasClass("offline"), "Created pending object.");
-    $user = getNewListEntry({
+    }, TIME_BEFORE_IDLE);    
+    ok($user.attr("id").substring(2) === "Pending" && $user.hasClass("offline"), "Created pending object.");
+});
+
+module("getNewListEntry()");
+test("Should create correct friend list objects", function() {
+    var $user = getNewListEntry({
         username: "Blocked"
-    }, "blocked");    
-    ok($user.attr("id") === "f_Blocked" && $user.hasClass("active"), "Created blocked object.")
+        }, "unblock, befriend");    
+    ok($user.attr("id").substring(2) === "Blocked" && $user.hasClass("active"), "Created blocked object.")
 });
 
 module("insertUser()", {

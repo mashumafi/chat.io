@@ -65,6 +65,7 @@ function canvasConnection(socket) {
 function denyFriend(data, callback) {
     data.session = this.id;
     chatdb.denyFriend(data, callback);
+    friendChange.call(this, data.username, "remove", "leave");
 }
 
 function logout(callback) {
@@ -72,7 +73,7 @@ function logout(callback) {
         username = getSocketUsername(this),
         rooms = g_io.sockets.manager.roomClients[this.id], 
         me_chat = getSocketAsOther(this, g_chat);
-    sendStatus.call(this, "logout");
+    sendStatus.call(this, "offline");
     console.info("user is leaving rooms");
     console.info("    " + username);
     for(var i in rooms) {

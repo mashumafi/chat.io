@@ -1,9 +1,10 @@
-var gChatCount = 0;
+var gChatCount = 0,
+    gBlockedUsers;
 
 //Fills friends list with users from friends array.
 //friends array is composed of objects that must contain a member username,
 //and possibly members _id and/or lastActivity.
-function populateFriendsList(friends) {
+function populateFriendsList(friends, timeToIdle) {
     var $friendsPending = $("#friends-pending");
     
     //Check that friends array exists and has elements
@@ -19,12 +20,12 @@ function populateFriendsList(friends) {
             if(friends[i]._id == null) {               //Friend is pending
                 console.log("You are awaiting approval from " + friends[i].username
                     + ", id = " + friends[i]._id);
-                getNewFriendEntry(friends[i], TIME_BEFORE_IDLE).appendTo($friendsPending);
+                getNewFriendEntry(friends[i], timeToIdle).appendTo($friendsPending);
             }
             else if(friends[i].lastActivity != null)    //Friend is online
-                getNewFriendEntry(friends[i], TIME_BEFORE_IDLE).appendTo($friendsOnline);
+                getNewFriendEntry(friends[i], timeToIdle).appendTo($friendsOnline);
             else                                        //Friend is offline
-                getNewFriendEntry(friends[i], TIME_BEFORE_IDLE).appendTo($friendsOffline);
+                getNewFriendEntry(friends[i], timeToIdle).appendTo($friendsOffline);
         }
     }   
     //Show pending section if there are pending friends, otherwise hide it.
@@ -36,19 +37,20 @@ function populateFriendsList(friends) {
 }
 
 function populateBlockedList(enemies) {
+    gBlockedUsers = [];
     if(enemies && enemies.length > 0) {
         enemies.sort(function(a, b) {return a.username.toLowerCase()
             .localeCompare(b.username.toLowerCase());});
         var $blockedUsers = $("#blocked-users");
         for(var i in enemies) {
+            gBlockedUsers.push(enemies[i].username);
             $blockedUsers.append(getNewListEntry(enemies[i], "unblock, befriend"));
         }
     }
 }
 
 function populateFriendRequests(requests) {
-    var $requestList = $("#friendRequests");
-    $requestList.css("height", "25em");//$("#friendsList").css("height"));
+    var $requestList = $("#friend-requests");
     if(requests && requests.length > 0) {
         $("#requestsTab").show();
         requests.sort(function(a, b) {return a.username.toLowerCase()
@@ -56,7 +58,7 @@ function populateFriendRequests(requests) {
         var $newReq;
         for(var i in requests) {
 			$newReq = $(document.createElement("div")).attr("id", "r_" + requests[i].username)
-				.html(requests[i].username + "<br/>")	//ADD CLASS TOO
+				.addClass("userListEntry").html(requests[i].username + "<br/>")
 				.append(getNewEntryMenu(requests[i].username, "befriend, deny"));
             $requestList.append($newReq);
 		}
@@ -64,6 +66,19 @@ function populateFriendRequests(requests) {
     }
     else
         $("#requestsTab").hide();
+}
+
+function isBlocked(username) {
+    var nUsers = gBlockedUsers.length,
+        result;
+        
+    for(var i = 0; i < nUsers; i++) {
+        result = gBlockedUsers[i].toLowerCase().localeCompare(username.toLowerCase());
+        if(result === 0)
+            return i;
+    }
+    
+    return -1;    
 }
 
 //Creates a new DOM element representing a friends or blocked list entry for
@@ -87,14 +102,14 @@ function getNewFriendEntry(user, timeToIdle) {
         //Determine if user is active or idle
         if((new Date().getTime()) - (new Date(user.lastActivity).getTime()) 
             >= timeToIdle || user.status === "idle")
-            styleClass = "userListEntry idle";
+            styleClass = "userListEntry highlight idle";
         else
-            styleClass = "userListEntry active";
+            styleClass = "userListEntry highlight active";
         //Get menu element
         $menu = getNewEntryMenu(user.username, "message, unfriend, blockuser");
     }
     else if (user.status == null || user.status === "offline"){
-        styleClass = "userListEntry offline";
+        styleClass = "userListEntry highlight offline";
         $menu = getNewEntryMenu(user.username, "unfriend, blockuser");
     }
 	$entry.addClass(styleClass).append($menu.hide());
@@ -167,7 +182,7 @@ function getNewEntryMenu(username, options) {
 					if(!err) {
 						$("#r_" + username).remove();
                         
-                        var numReqs = $("#friendRequests").children().length;
+                        var numReqs = $("#friend-requests").children().length;
                         if(numReqs == 0) {
                             $("#friendsTabLink").click();
                             $("#requestsTab").hide();
@@ -185,9 +200,10 @@ function addNewFriend(name) {
     if(name !== user_name) {
         addFriend({username:name}, function(err, data) {
             if(!err) {
-    			var $user = $("#u_" + name);
-    			if($user.length != 0)
-    				$user.remove();
+                //If user is on blocked list, remove.
+                var $user = $("#u_" + name);
+                if($user.length != 0)
+                    $user.remove();
                     
                 if(data && data.lastActivity != null)
                     insertUser(getNewFriendEntry(data, TIME_BEFORE_IDLE), "friends-online");
@@ -198,17 +214,17 @@ function addNewFriend(name) {
                     $("#friends-pending-label").show();
                 }
                 
-    			var $req = $("#r_" + name);
-    			if($req.length > 0) {
-    				$req.remove();
-                    var numReqs = $("#friendRequests").children().length;
+                var $req = $("#r_" + name);
+                if($req.length > 0) {
+                    $req.remove();
+                    var numReqs = $("#friend-requests").children().length;
                     if(numReqs == 0) {
                         $("#friendsTabLink").click();
                         $("#requestsTab").hide();
                     }
                     else
-    				    $("#requestsTab > a").html(numReqs);
-    			}            
+                        $("#requestsTab > a").html(numReqs);
+                }            
             }
             else
                 console.log("Error adding friend: " + err);
@@ -225,6 +241,8 @@ function addNewBlockedUser(name) {
     				$user.remove();
                 insertUser(getNewListEntry({username:name},"unblock, befriend"), 
                     "blocked-users");
+                    
+                gBlockedUsers.push(name); 
             }
             else
                 console.log("Error blocking user: " + err);
@@ -246,25 +264,65 @@ function deleteFriend(name) {
 
 function deleteBlockedUser(name) {
     unblockUser({username:name}, function(err) {
+        var i;
         if(!err) {
             $("#u_" + name).remove();
+            if((i = isBlocked(name)) >= 0)
+                gBlockedUsers.splice(i,1);
         }
         else
             console.log("Error unblocking user: " + err);
     });
 }
-//logout active idle
+
+/**
+ * Updates moves a friends list element to the appropriate section of the
+ * list, changing the style and menu options accordingly.
+ * @param {String} Username of friend whose status changed.
+ * @param {String} Friend's new status.  Must be "active," "idle," or "offline."
+ **/
 function statusChange(username, status) {
-	$userEntry = $("#u_" + username ).remove();
-    if(status === "logout")
-        insertUser(getNewFriendEntry({username:username, status:"offline"}),"friends-offline");
-    else if(status === "active" || status === "idle")
-        insertUser(getNewFriendEntry({username:username, status:status}),"friends-online");
+    var $userEntry = $("#u_" + username ),
+        prevStatus;
+        
+    if($userEntry.length != 0) {
+        //Find current status
+        if($userEntry.hasClass("offline"))
+            prevStatus = "offline";
+        else if($userEntry.hasClass("active"))
+            prevStatus = "active";    
+        else
+            prevStatus = "idle";
+        
+        //Update user list element
+        if(status === "offline") {
+        //User logged out, so delete old list element and create a new one
+            $userEntry = $("#u_" + username ).remove();
+            insertUser(getNewFriendEntry({username:username, status:status}),"friends-offline");
+        }
+        else if((status === "active" || status === "idle") && prevStatus ==="offline") {
+        //User came online, so delete old list element and create a new one
+            $userEntry = $("#u_" + username ).remove();
+            insertUser(getNewFriendEntry({username:username, status:status}),"friends-online");
+        }
+        else if(status === "active" || status === "idle") {
+        //User went from active to idle or vice versa.  Just change the style.
+            $userEntry.removeClass(prevStatus).addClass(status);
+        }
+    }
 }
 
+/**
+ * Updates displayed friend, blocked user, and friend request lists to reflect
+ * changes in user relationships.
+ * @param {String} Username of friend whose status changed.
+ * @param {String} Action taken towards this user by the given user.  Must be 
+ * "add," "remove," or "block."
+ **/
 function friendChange(username, status) {
     var $user = $("#u_" + username),
         isFriend = $user.length > 0;
+    console.log("**" + username + status + "ed you. Current friend status: " + isFriend);
     if(status === "add") {
         if(isFriend) {
 			$user.remove();
@@ -274,10 +332,10 @@ function friendChange(username, status) {
         }
         else {
 			var $newReq = $(document.createElement("div")).attr("id", "r_" + username)
-				.html(username + "<br/>")	//ADD CLASS TOO
+				.addClass("userListEntry").html(username + "<br/>")
 				.append(getNewEntryMenu(username, "befriend, deny"));
-            insertUser($newReq, "friendRequests");
-			$("#requestsTab > a").html($("#friendRequests").children().length);
+            insertUser($newReq, "friend-requests");
+			$("#requestsTab > a").html($("#friend-requests").children().length);
 			$("#requestsTab").show();
         }
     }
@@ -289,7 +347,7 @@ function friendChange(username, status) {
         }
         else {
             $("#r_" + username).remove();
-            if($("#friendRequests").children().length == 0)
+            if($("#friend-requests").children().length == 0)
                 $("#requestsTab").hide();
         }
     }
@@ -301,11 +359,11 @@ function friendChange(username, status) {
         }
         else {
             $("#r_" + username).remove();
-            if($("#friendRequests").children().length == 0)
+            if($("#friend-requests").children().length == 0)
                 $("#requestsTab").hide();
         }
     }
-    else if(status === "unblock") {}
+    //else if(status === "unblock") {}
 }
 
 //Inserts JQuery object $user in to the element with id listID.

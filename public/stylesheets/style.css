@@ -12,7 +12,7 @@ body {
     left: 50%;
     margin-left: -96px;
     top:8%;
-    opacity: .4;
+    /*opacity: .4;*/
 }
 .temp { /* For Auto Login*/
     border: thin solid black;
@@ -36,7 +36,7 @@ a {
 #sideBar {
     height: 100%;
     width: 18em;
-    background-color: #71A352;
+    background-color: #B4DB9C;
     position: relative;
     z-index: 9000;
 }
@@ -53,8 +53,7 @@ a {
 
 /* Friend / Block List  */
 #userLists {
-    font-size: 0.9em;
-	width: 16em;
+	width: 15em;
     margin: 0 auto;
 }
 #userLists input{
@@ -63,7 +62,7 @@ a {
     margin: auto;
 }
 .userListHeight {
-    height: 22em;   
+    height: 18em;   
 }
 .userListContainer {
 	border: thin solid #909090;
@@ -82,18 +81,18 @@ a {
 	font-size: 0.8em;
 	padding: 0.5em 1em;
 }
-div.userListEntry:hover {
-	background-color: #fff6d4;
+.highlight:hover {
+	background-color: #ccffcc;
 }
 .userListAdd {
     margin: auto;
     width: 100%;
 }
 .userListEntryMenu {
-    margin-left: 1em;
+    margin-left: .5em;
 	font-style: normal;
-	font-size: 0.90em;
-	color: blue;
+	font-size: 0.9em;
+	color: green;
     cursor: pointer;
 }
 .active {
@@ -105,9 +104,9 @@ div.userListEntry:hover {
 .offline {
 	color: #5e5e5e;
 }
-
 .error {
     color: red;
+    font-size: .9em;
 }
 .no-close-x .ui-dialog-titlebar-close {
     display: none;
@@ -125,6 +124,7 @@ div.userListEntry:hover {
     width: 17em;
 }
 .chat-right {
+    font-size: .9em;
     width: 11em;
     position: absolute !important;
     padding: 20px 20px 20px 10px;
@@ -139,12 +139,12 @@ div.userListEntry:hover {
 }
 
 .chat-listHeight {
-    height: 14em;   
+    height: 17.5em;   
 }
 .chat-canvas {
     margin: auto;
     width: 256px;
-    height: 256px;
+    height: 320px;
 }
 .chat-input {
     font-size: .75em;
@@ -173,14 +173,4 @@ div.userListEntry:hover {
 .receiver {
     color: #0457DB;
     font-weight: bold;
-}
-.chat-toggle-left {
-    margin-left: 0;
-}
-.chat-toggle-right {
-    margin-right: 0;
-    margin-left: auto;
-}
-.chat-send {
-    margin: auto;
 }

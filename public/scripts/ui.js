@@ -20,7 +20,7 @@ $(document).ready(function () {
         event.preventDefault();
         var name = $("#userName").attr("value"); 
         $("#userName").attr("value", "");
-        if(name.length > 0 && $("#" + name).length === 0) { //check if dialog between users exists
+        if(name.length > 0 ) {//&& $("#" + name).length === 0) { //check if dialog between users exists
             $(this).button("disable");
             createDialog({
                 room: user_name + new Date().getTime() + gChatCount++,
@@ -34,8 +34,18 @@ $(document).ready(function () {
         logout(function() {
             $("#logOff").button("enable");
             $(".chat").dialog("destroy").remove();
+            document.title = "chat.io";
             toggleSideBar();
-            $(".userListEntry").remove();
+            
+            //Clear user lists
+            $("#friends-online").empty();
+            $("#friends-offline").empty();
+            $("#friends-pending").empty();
+            $("#blocked-users").empty();
+            $("#friend-requests").empty();
+            
+            $("#friendsTabLink").click();
+            
             $loginDialog.dialog("open");
             $("#autoLogin").show();
             //location.reload();
@@ -60,6 +70,8 @@ $(document).ready(function () {
         }
     });
     
+    $("#friendRequests").css("height", $("#friendsList").css("height"));
+    
     $userLists = $("#userLists").tabs();
     
     $("#sideBar").css("margin-left", -$("#sideBar").outerWidth());
@@ -83,12 +95,12 @@ $(document).ready(function () {
                         $("#login-login").button("enable");
                         $(".error").text("");
                         if (err) {
-                            for (var e in err) {
-                                $("#" + e + "L").text(err[e]);
-                            }
-                        } else {
+                                $("#loginError").text("Invalid username/password combination");
+                        }
+                        else {
                             $loginDialog.dialog("close");
                             $loginDialog[0].reset();
+                            $("#loginError").html("&nbsp;");
                             onLogin(result);
                         }
                     });
@@ -99,6 +111,7 @@ $(document).ready(function () {
                 click: function () {
                     $loginDialog.dialog("close");
                     $loginDialog[0].reset();
+                    $("#loginError").html("&nbsp;");
                     $registerDialog.dialog("open");
                     $("#autoLogin").hide();
                 }
@@ -194,7 +207,7 @@ function onLogin(userData) {
         user_name = userData.username;
         document.title = "chat.io - " + user_name;
         //$("#friendRequests").css("height", $("#friendsList").css("height"));
-        populateFriendsList(userData.friends.friends);
+        populateFriendsList(userData.friends.friends, TIME_BEFORE_IDLE);
         populateBlockedList(userData.friends.blocked);
         populateFriendRequests(userData.friends.requests);
         toggleSideBar();

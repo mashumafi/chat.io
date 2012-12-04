@@ -6,12 +6,47 @@
  * @param {String} Name of room affected.
  **/
 function userJoinsLeaves(username, join_or_leave, room) {
-    if(join_or_leave === "join") {
-        insertUser(getNewListEntry({username:username}, "message, befriend, blockuser"),
-            room + "_users");
-    }
-    else if(join_or_leave === "leave") {
-        $("#" + room + "_users").children("#u_" + username).remove();
+    var $room = $("#" + room);
+    if($room.length !== 0) {
+        var title = $room.prev().children(".ui-dialog-title").html(),
+            numUsers;
+        
+        if(join_or_leave === "join"
+         && $("#" + room + "_users").children("#u_" + username).length === 0) {
+            //Add new user to the dialog's user list
+            insertUser(getNewListEntry({username:username}, "message, befriend, blockuser"),
+                room + "_users"); 
+            numUsers = $("#" + room + "_users").children().length;
+            
+            //User joined a private chat & was not one of original 2 participants
+            if(room.substring(0,3) === "pr_" && title !== username 
+             && username !== user_name) {
+                //Chat was a direct chat between two users, not yet a group chat
+                if(title.substring(0,10) !== "Group Chat") {
+                    //Stop sending messages to a specific user.
+                    $("#" + room + "_send").unbind("click").click(function() {
+                        sendClick(room, send);});
+                }
+                //Change title to reflect group chat status.
+                $room.dialog("option", "title", "Group Chat(" + numUsers + ")");
+            }
+            //User joined a public room
+            else if(room.substring(0,3) !== "pr_")
+                //Update dialog title's user count.
+                $room.dialog("option", "title", room + "(" + numUsers + ")");
+        }
+        else if(join_or_leave === "leave") {
+            $("#" + room + "_users").children("#u_" + username).remove();
+            
+            //Update dialog title's user count.
+            numUsers = $("#" + room + "_users").children().length;
+            if(title.substring(0,10) === "Group Chat") {
+                $room.dialog("option", "title", "Group Chat(" + numUsers + ")");
+            }
+            else if(title !== username) {
+                $room.dialog("option", "title", room + "(" + numUsers + ")");
+            }
+        }
     }
 }
 
@@ -27,8 +62,14 @@ function showInvite(username, room) {
                 {
                     text: "Accept",
                     click: function() {
-                        if($("#" + room).length == 0)
-                            createDialog({room: room}, send);
+                        if($("#" + room).length == 0) {
+                            var dialogTitle;
+                            if(room.substring(0,3) === "pr_")
+                                dialogTitle = "Group Chat";
+                            else
+                                dialogTitle = room;
+                            createDialog({room: room, title: dialogTitle}, send);
+                        }
                         $(this).dialog("destroy").remove();
                     }
                 },
@@ -49,33 +90,32 @@ function receive(data) {
         leaveRoom(data.room);
         return;
     }
-    //Check that dialog for room message belongs to exists.  If not, make it. 
+    
+    //No dialog exists for the room to which the message belongs.
     if($("#" + data.room).length == 0) {
-        if( data.from === user_name) //Receipient is author of message
+        if( data.from === user_name) //Recipient is author of message
             createDialog({room: data.room}, send);
-        else if(data.from)   //One on one chat
+        else if(!data.isGroup)   //One on one chat
             createDialog({room: data.room, username: data.from}, send);
-        else {  //Recipient is not a friend of the author
+        else {  //User has been invited to a group chat room
             showInvite(data.from, data.room);
             return;
         }
     }
-    var $output = $("#" + data.room + "_output"),
-        formattedName;
-        //shouldAutoScroll;
-    
-    //Set color of username according to whether sender or receiver.
-    if (data.from !== user_name) 
-        formattedName = "<span class='receiver'>" + data.from + "&nbsp&nbsp</span>";
-    else if (data.from != null)
-        formattedName = "<span class='sender'>" + data.from + ":&nbsp&nbsp</span>";
-    else
-        formattedName = "";
-    //shouldAutoScroll = $output.prop("scrollTop") == $output.prop("scrollHeight");
-    
-    //Post message in user's window.
-    $output.html($output.html() + "<p>" + formattedName + data.msg.substring(3));
-    
+    var $output = $("#" + data.room + "_output"), formattedName;
+    if(data.msg) {        
+        //Set color of username according to whether sender or receiver.
+        if (data.from !== user_name) 
+            formattedName = "<span class='receiver'>" + data.from + ":&nbsp&nbsp</span>";
+        else if (data.from != null)
+            formattedName = "<span class='sender'>" + data.from + ":&nbsp&nbsp</span>";
+        else
+            formattedName = "";
+        //shouldAutoScroll = $output.prop("scrollTop") == $output.prop("scrollHeight");
+        
+        //Post message in user's window.
+        $output.html($output.html() + "<p>" + formattedName + data.msg.substring(3));
+    }
     //if(shouldAutoScroll)
     $output.prop("scrollTop", $output.prop("scrollHeight"));    
 }
@@ -106,7 +146,6 @@ function createDialog(info, callback) {
 		
 	//Wrap content in JQuery UI Dialog
     $content.dialog({
-        title: info.username || info.room,
 		autoOpen: false,
         resizable: false,
         close: function(event, ui) {
@@ -191,19 +230,29 @@ function createDialog(info, callback) {
     $("#" + info.room + "_invite").button()
         .click(function(e) {
             e.preventDefault();
-            var message = {
+            var recipient = $(this).parent().prev().children().val(),
+                currentTitle = $("#" + info.room).prev().children(".ui-dialog-title").html();
+                groupStatus = (info.room.substring(0,3) !== "pr_" 
+                        || (info.room.substring(0,3) === "pr_" 
+                        && currentTitle !== recipient)),
+                message = {
                     room: info.room,
-                    username: $(this).prev().val(),
+                    isGroup: groupStatus,
+                    username: recipient,
                     msg: ""
                 };
-            $(this).prev().val("");
+            $(this).parent().prev().children().val("");
             send(message, function(err) {});
         });
 		
     getUsersInRoom(info.room, function(users) {
         populateUserList(users, info.room + "_users");
-		//if(users != null && users.length > 0)
-		
+        var dialogTitle;
+        if(info.title)
+           dialogTitle = info.title + "(" + users.length + ")";
+        else
+           dialogTitle = info.username ? info.username : info.room + "(" + users.length + ")";
+        $("#" + info.room).dialog("option", "title", dialogTitle);
     });
 	
     //Add canvas to left drawing panel

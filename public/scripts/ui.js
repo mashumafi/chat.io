@@ -11,6 +11,7 @@ $(document).ready(function () {
         if(rm.length > 0 && $("#" + rm).length === 0) {
             $(this).button("disable");
             joinRoom(rm, function(rm) {
+                console.log("**Attempting to join " + rm);
                 createDialog({room: rm}, send);
                 $("#room-join").button("enable");
             });
@@ -23,7 +24,7 @@ $(document).ready(function () {
         if(name.length > 0 ) {//&& $("#" + name).length === 0) { //check if dialog between users exists
             $(this).button("disable");
             createDialog({
-                room: user_name + new Date().getTime() + gChatCount++,
+                room: "pr_" + user_name + new Date().getTime() + gChatCount++,
                 username: name
                 }, send);
             $(this).button("enable");
@@ -177,25 +178,22 @@ $(document).ready(function () {
     
     /*************** Auto Login ****************/
     //Remember to remove #autoLogin hide and show from 
-    //login-register & register-close, and from logoff()
+    //login-register, register-close, onLogin(), and logoff()
     $("#autoLogin").position({my: "left center", at: "right center", of: $loginDialog});
     $("#mashumafi").button().click(function(){
         $("input[name=usernameL]").val("mashumafi");
         $("input[name=passwordL]").val("Pa55word!");
         $("#login-login").click();
-        $("#autoLogin").hide();
     });
     $("#nagolyhprum").button().click(function(){
         $("input[name=usernameL]").val("nagolyhprum");
         $("input[name=passwordL]").val("Pa55word!");
         $("#login-login").click();
-        $("#autoLogin").hide();
     });
     $("#schwowsers").button().click(function(){
         $("input[name=usernameL]").val("schwowsers");
         $("input[name=passwordL]").val("A#3edcde");
         $("#login-login").click();
-        $("#autoLogin").hide();
     });
     /*************** Auto Login ****************/
 });
@@ -204,6 +202,7 @@ $(document).ready(function () {
 function onLogin(userData) {
     // validate that login succeeded
     if (userData.email) {
+        $("#autoLogin").hide();
         user_name = userData.username;
         document.title = "chat.io - " + user_name;
         //$("#friendRequests").css("height", $("#friendsList").css("height"));

@@ -102,10 +102,13 @@ canvas.on("updateCanvas", function(data) {
 });
 
 canvas.on("requestCanvas", function(room) {
-    canvas.emit("updateCanvas", {
-        data : asByteArray($("#canvas_" + room)[0].getContext("2d")),
-        room : room
-    });    
+    var $canvas = $("#canvas_" + room);
+    if($canvas.length != 0) {
+        canvas.emit("updateCanvas", {
+            data : asByteArray($canvas[0].getContext("2d")),
+            room : room
+        }); 
+    }
 });
 
 /*

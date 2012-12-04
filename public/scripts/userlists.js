@@ -140,7 +140,7 @@ function getNewEntryMenu(username, options) {
 			.click(function(event) {
 				event.stopPropagation();
 				createDialog({
-                        room: user_name + new Date().getTime() + gChatCount++,
+                        room: "pr_" + user_name + new Date().getTime() + gChatCount++,
                         username: username
                     }, send);
 			}));
@@ -322,7 +322,7 @@ function statusChange(username, status) {
 function friendChange(username, status) {
     var $user = $("#u_" + username),
         isFriend = $user.length > 0;
-    console.log("**" + username + status + "ed you. Current friend status: " + isFriend);
+    console.log("**" + username + " " + status + "ed you. Current friend status: " + isFriend);
     if(status === "add") {
         if(isFriend) {
 			$user.remove();

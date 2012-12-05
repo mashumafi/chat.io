@@ -163,6 +163,7 @@ $(document).ready(function () {
                 click: function () {
                     $registerDialog.dialog("close");
                     $registerDialog[0].reset();
+                    $registerDialog.find(".error").text("");
                     $loginDialog.dialog("open");
                     $("#autoLogin").show();
                 }
@@ -203,9 +204,12 @@ function onLogin(userData) {
     // validate that login succeeded
     if (userData.email) {
         $("#autoLogin").hide();
+        $registerDialog.find(".error").text("");
         user_name = userData.username;
         document.title = "chat.io - " + user_name;
-        //$("#friendRequests").css("height", $("#friendsList").css("height"));
+        if(userData.friends === undefined) {
+            userData.friends = {};
+        }
         populateFriendsList(userData.friends.friends, TIME_BEFORE_IDLE);
         populateBlockedList(userData.friends.blocked);
         populateFriendRequests(userData.friends.requests);

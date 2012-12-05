@@ -98,7 +98,10 @@ function asImageData(ctx, b) {
 }
 
 canvas.on("updateCanvas", function(data) {
-    draw($("#canvas_" + data.room)[0].getContext("2d"), data);
+    var $canvas = $("#canvas_" + data.room);
+    if($canvas.length != 0) {
+        draw($("#canvas_" + data.room)[0].getContext("2d"), data);
+    }
 });
 
 canvas.on("requestCanvas", function(room) {

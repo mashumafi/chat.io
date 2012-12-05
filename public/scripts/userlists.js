@@ -8,7 +8,7 @@ function populateFriendsList(friends, timeToIdle) {
     var $friendsPending = $("#friends-pending");
     
     //Check that friends array exists and has elements
-    if(friends && friends.length > 0) {
+    if(friends != null && friends.length > 0) {
         
         //Put friends array in alphabetical order
         friends.sort(function(a, b) {return a.username.toLowerCase()
@@ -38,7 +38,7 @@ function populateFriendsList(friends, timeToIdle) {
 
 function populateBlockedList(enemies) {
     gBlockedUsers = [];
-    if(enemies && enemies.length > 0) {
+    if(enemies != null && enemies.length > 0) {
         enemies.sort(function(a, b) {return a.username.toLowerCase()
             .localeCompare(b.username.toLowerCase());});
         var $blockedUsers = $("#blocked-users");
@@ -51,7 +51,7 @@ function populateBlockedList(enemies) {
 
 function populateFriendRequests(requests) {
     var $requestList = $("#friend-requests");
-    if(requests && requests.length > 0) {
+    if(requests != null && requests.length > 0) {
         $("#requestsTab").show();
         requests.sort(function(a, b) {return a.username.toLowerCase()
             .localeCompare(b.username.toLowerCase());});
@@ -201,7 +201,7 @@ function addNewFriend(name) {
         addFriend({username:name}, function(err, data) {
             if(!err) {
                 //If user is on blocked list, remove.
-                var $user = $("#u_" + name);
+                var $user = $("#blockedList").find("#u_" + name);
                 if($user.length != 0)
                     $user.remove();
                     
@@ -236,7 +236,7 @@ function addNewBlockedUser(name) {
     if(name !== user_name) {
         blockUser({username:name}, function(err) {
             if(!err) {
-    			var $user = $("#u_" + name);
+    			var $user = $("#friendsList").find("#u_" + name);
     			if($user.length != 0)
     				$user.remove();
                 insertUser(getNewListEntry({username:name},"unblock, befriend"), 
@@ -253,7 +253,7 @@ function addNewBlockedUser(name) {
 function deleteFriend(name) {
     removeFriend({username:name}, function(err) {
         if(!err) {
-            $("#u_" + name).remove();
+            $("#friendsList").find("#u_" + name).remove();
             if($("#friends-pending").children().length == 0)
                 $("#friends-pending-label").hide();
         }
@@ -266,9 +266,12 @@ function deleteBlockedUser(name) {
     unblockUser({username:name}, function(err) {
         var i;
         if(!err) {
-            $("#u_" + name).remove();
-            if((i = isBlocked(name)) >= 0)
+            $("#BlockedList").find("#u_" + name).remove();
+            console.log("Before: " + gBlockedUsers.length);
+            if((i = isBlocked(name)) >= 0) {
                 gBlockedUsers.splice(i,1);
+                console.log("After: " + gBlockedUsers.length);
+            }
         }
         else
             console.log("Error unblocking user: " + err);
@@ -282,32 +285,35 @@ function deleteBlockedUser(name) {
  * @param {String} Friend's new status.  Must be "active," "idle," or "offline."
  **/
 function statusChange(username, status) {
-    var $userEntry = $("#u_" + username ),
+    var $userEntry = $("#friendsList").find("#u_" + username ),
         prevStatus;
-        
-    if($userEntry.length != 0) {
-        //Find current status
-        if($userEntry.hasClass("offline"))
-            prevStatus = "offline";
-        else if($userEntry.hasClass("active"))
-            prevStatus = "active";    
-        else
-            prevStatus = "idle";
-        
-        //Update user list element
-        if(status === "offline") {
-        //User logged out, so delete old list element and create a new one
-            $userEntry = $("#u_" + username ).remove();
-            insertUser(getNewFriendEntry({username:username, status:status}),"friends-offline");
-        }
-        else if((status === "active" || status === "idle") && prevStatus ==="offline") {
-        //User came online, so delete old list element and create a new one
-            $userEntry = $("#u_" + username ).remove();
-            insertUser(getNewFriendEntry({username:username, status:status}),"friends-online");
-        }
-        else if(status === "active" || status === "idle") {
-        //User went from active to idle or vice versa.  Just change the style.
-            $userEntry.removeClass(prevStatus).addClass(status);
+    if($userEntry.parent().attr("id") !== "friends-pending" 
+        && $userEntry.parent().attr("id") !== "blocked-users") {
+        console.log("***" + username + "'s new status: " + status);
+        if($userEntry.length != 0) {
+            //Find current status
+            if($userEntry.hasClass("offline"))
+                prevStatus = "offline";
+            else if($userEntry.hasClass("active"))
+                prevStatus = "active";    
+            else
+                prevStatus = "idle";
+            
+            //Update user list element
+            if(status === "offline") {
+            //User logged out, so delete old list element and create a new one
+                $userEntry = $("#friendsList").find("#u_" + username ).remove();
+                insertUser(getNewFriendEntry({username:username, status:status}),"friends-offline");
+            }
+            else if((status === "active" || status === "idle") && prevStatus ==="offline") {
+            //User came online, so delete old list element and create a new one
+                $userEntry = $("#friendsList").find("#u_" + username ).remove();
+                insertUser(getNewFriendEntry({username:username, status:status}),"friends-online");
+            }
+            else if(status === "active" || status === "idle") {
+            //User went from active to idle or vice versa.  Just change the style.
+                $userEntry.removeClass(prevStatus).addClass(status);
+            }
         }
     }
 }
@@ -320,8 +326,10 @@ function statusChange(username, status) {
  * "add," "remove," or "block."
  **/
 function friendChange(username, status) {
-    var $user = $("#u_" + username),
-        isFriend = $user.length > 0;
+    var $user = $("#friendsList").find("#u_" + username),
+        isFriend = false;
+    if($user.length != 0 && $user.parent().attr("id") !== "blocked-users")
+        isFriend = true
     console.log("**" + username + " " + status + "ed you. Current friend status: " + isFriend);
     if(status === "add") {
         if(isFriend) {

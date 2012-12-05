@@ -302,8 +302,13 @@ function removeRelationship(data, callback) {
     function (err, result) {
         if (!err && result.user && result.friend) {
             Relationship.find({
-                owner: result.user._id,
-                other: result.friend._id
+                $or: [{
+                    owner: result.user._id,
+                    other: result.friend._id
+                }, {
+                    owner: result.friend._id,
+                    other: result.user._id
+                }]
             }).remove(function (err, result) {
                 callback( !! err);
             });
@@ -326,7 +331,9 @@ module.exports.removeFriend = function (data, callback) {
  * @returns callback(err, res) if err is false then it succeeded
  */
 module.exports.blockUser = function (data, callback) {
-    addRelationship(false, data, callback);
+    removeRelationship(data, function() {
+        addRelationship(false, data, callback);
+    });
 };
 /**
  * @param {Object} data contains session of current user and username of the user to unblock

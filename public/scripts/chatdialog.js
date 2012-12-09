@@ -1,15 +1,18 @@
 /**
  * Updates chat window user list when a user joins or leaves, and changes 
  * window title if needed.
- * @param {String} Username of user who joined or left the chat.
- * @param {String} Action taken by user.  Must be either "join" or "leave."
- * @param {String} Name of room affected.
+ * @param {String} username Name of user who joined or left the chat.
+ * @param {String} join_or_leave Action taken by user.  Must be either "join" or "leave."
+ * @param {String} room Name of room affected.
+ * @return
  **/
 function userJoinsLeaves(username, join_or_leave, room) {
-    var $room = $("#" + room);
+    var $room = $("#" + room);  //Get JQuery object representing chat dialog
+
     if($room.length !== 0) {
         var title = $room.prev().children(".ui-dialog-title").html(),
             numUsers;
+        
         
         if(join_or_leave === "join"
          && $("#" + room + "_users").children("#u_" + username).length === 0) {
@@ -49,13 +52,20 @@ function userJoinsLeaves(username, join_or_leave, room) {
         }
     }
 }
-
+/**
+ * Displays a prompt alerting the user that they were invited to a chat room
+ * and gives them the option to accept or deny it.
+ * @param {String} username Name of the user who sent the invite.
+ * @param {String} room Name of the room to which the user has been invited. 
+ * @return
+ * */
 function showInvite(username, room) {
     //leaveRoom(room);  //add join() in accept function if using this   
     
+    //Create invite prompt
     $(document.createElement("div")).html("<p>" + username + " has invited you to chat!</p>")
         .dialog({
-            title: "Chat Invite",
+            title: "Chat Invite",   
             resizable: false,
             dialogClass: "no-close-x",
             buttons: [
@@ -64,6 +74,7 @@ function showInvite(username, room) {
                     click: function() {
                         if($("#" + room).length == 0) {
                             var dialogTitle;
+                            //If it's a private chat, set chat title
                             if(room.substring(0,3) === "pr_")
                                 dialogTitle = "Group Chat";
                             else
@@ -83,7 +94,17 @@ function showInvite(username, room) {
             ]
         });
 }
-
+/**
+ * Displays a message in the appropriate chat dialog, creating the dialog
+ * first if none yet exists.
+ * @param {Object} data Information about the message.
+ * @param {String} data.room The room to which the message belongs.
+ * @param {String} data.from The author of the message.
+ * @param {String} data.msg The message.
+ * @param {boolean} data.isGroup Used for invites.  True if the room is a group
+ * chat room, false if it is a direct chat between two users.
+ * @return 
+ **/
 function receive(data) {
     //If sender is blocked by recipient, ignore message.
     if(isBlocked(data.from) >= 0) {
@@ -111,20 +132,28 @@ function receive(data) {
             formattedName = "<span class='sender'>" + data.from + ":&nbsp&nbsp</span>";
         else
             formattedName = "";
-        //shouldAutoScroll = $output.prop("scrollTop") == $output.prop("scrollHeight");
         
         //Post message in user's window.
         $output.html($output.html() + "<p>" + formattedName + data.msg.substring(3));
     }
-    //if(shouldAutoScroll)
+    //Automatically scroll window to bottom
     $output.prop("scrollTop", $output.prop("scrollHeight"));    
 }
 
-//Creates a new chat window.
+/**
+ * Creates a new chat dialog for the given room.
+ * @param {Object} info Information about the room.
+ * @param {String} info.room Name of room 
+ * @param {String} info.username Name of user to which messages will be sent.
+ * @param {String} info.title Title of the chat room.  Only provided as needed
+ * by certain invites.
+ * @param {Function} callback Function to be called when sending a message.
+ * @return
+ **/
 function createDialog(info, callback) {
     var $content,
         $parent,
-		chat,
+    	chat,
 		canvas,
 		userList;
     
@@ -158,9 +187,11 @@ function createDialog(info, callback) {
 	//Restrict dialog's draggable area
     $content.dialog("widget").draggable("option", "containment", "#mainArea");
     
+    //Convert input textarea into TinyMCE editor
     $("#" + info.room + "_input").tinymce({
         width: "100%",
         theme: "advanced",
+        //Set enter key to click send message as long as shift isn't also pressed.
         handle_event_callback: function(e) {
             if(e.which == 13 && !e.shiftKey) {
                 e.preventDefault();
@@ -202,6 +233,7 @@ function createDialog(info, callback) {
                     </form>\
                 </div>";
     
+    //Append both side panels to the chat dialog
     $parent = $content.parent().append(canvas + userList).css("overflow", "visible");
 	
 	//Set button to show or hide canvas panel
@@ -227,11 +259,13 @@ function createDialog(info, callback) {
             else
                 $panel.hide();
 		});
+    //Set up invite button
     $("#" + info.room + "_invite").button()
         .click(function(e) {
             e.preventDefault();
             var recipient = $(this).parent().prev().children().val(),
                 currentTitle = $("#" + info.room).prev().children(".ui-dialog-title").html();
+                //Check if chat is a group chat or direct chat between 2 users.
                 groupStatus = (info.room.substring(0,3) !== "pr_" 
                         || (info.room.substring(0,3) === "pr_" 
                         && currentTitle !== recipient)),
@@ -241,12 +275,13 @@ function createDialog(info, callback) {
                     username: recipient,
                     msg: ""
                 };
-            $(this).parent().prev().children().val("");
+            $(this).parent().prev().children().val(""); //Clear invite textbox
             send(message, function(err) {});
         });
 		
     getUsersInRoom(info.room, function(users) {
         populateUserList(users, info.room + "_users");
+        //Set chat dialog's title.
         var dialogTitle;
         if(info.title)
            dialogTitle = info.title + "(" + users.length + ")";
@@ -264,7 +299,7 @@ function createDialog(info, callback) {
 			cvs.css({width: "100%", height: "100%"});
 			$("#" + info.room + "_canvas").append(cvs);    
 		});
-        
+    //Set size of side panels and hide them.
     var width = $parent.innerWidth();
     $("#" + info.room + "_left").css({"right":width, "top":"0px", "bottom":"0px"})
         .hide();
@@ -273,7 +308,14 @@ function createDialog(info, callback) {
 	
 	$content.dialog("open");
 }
-
+/**
+ * Function to be assigned as click event for chat dialog send button.
+ * @param {String} room Name of room.
+ * @param {Function} callback Function to be called when sending messages.
+ * @param {String} recipient Name of user to which message should be sent.
+ * Only supplied in the case of direct one on one chats.
+ * @return
+ **/
 function sendClick(room, callback, recipient) {
 	//Get room name and message.
 	var $input = $("#" + room + "_input");
@@ -291,7 +333,12 @@ function sendClick(room, callback, recipient) {
 		});
 	}
 }
-
+/**
+ * Fills a chat dialog's user list with the names of the participants.
+ * @param {String[]} names Usernames of participants.
+ * @param {String} listID The ID of the DOM element representing the list.
+ * @return
+ **/
 function populateUserList(names, listID) {
     if(names && names.length > 0) {
         names.sort(function(a, b) {return a.toLowerCase()

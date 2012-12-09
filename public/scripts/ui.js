@@ -199,7 +199,22 @@ $(document).ready(function () {
     /*************** Auto Login ****************/
 });
 
-//Prepares client for fresh log in
+/**
+ * Prepares the page after log in.
+ * @param userData Information about the user.
+ * @param userData.email The e-mail address of the user.
+ * @param userData.friends The lists of friends, blocked users, and incoming
+ * friend requests.
+ * @param userData.friends.friends The list of the user's friends.
+ * @param userData.friends.friends._id The id of the friend.
+ * @param userData.friends.friends.username The username of the friend.
+ * @param userData.friends.friends.lastActivity Date of friend's last activity.
+ * @param userData.friends.blocked The list of people the user has blocked.
+ * @param userData.friends.blocked.username Username of a blocked user.
+ * @param userData.friends.requests A list of any unanswered incoming requests.
+ * @param userData.friends.requests.username Name of individual who sent request.
+ * @return
+ **/
 function onLogin(userData) {
     // validate that login succeeded
     if (userData.email) {
@@ -216,7 +231,10 @@ function onLogin(userData) {
         toggleSideBar();
     }
 }
-
+/**
+ * Shows or hides the side bar.
+ * @return
+ **/
 function toggleSideBar() {
     var $sideBar = $("#sideBar");
     $sideBar.animate({

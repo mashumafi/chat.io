@@ -29,7 +29,11 @@ module.exports = function(io) {
     g_friends = io.of("/friends").on("connection", friendsConnection);
     g_canvas = io.of("/canvas").on("connection", canvasConnection)
 };
-
+/**
+ * The supplied '/chat' socket will be notified about chat interactions
+ * @param {Socket} the socket that will listen for these events
+ * @returns
+ */
 function chatConnection(socket) {
     socket
         .on("send", send)
@@ -38,6 +42,11 @@ function chatConnection(socket) {
         .on("getUsersInRoom", getUsersInRoom);
 }
 
+/**
+ * The supplied '/user' socket will be notified about user interactions
+ * @param {Socket} the socket that will listen for these events
+ * @returns
+ */
 function userConnection(socket) {
     socket
         .on("login", login)
@@ -51,23 +60,39 @@ function userConnection(socket) {
         .on("denyFriend", denyFriend);
 }
 
+/**
+ * The supplied '/canvas' socket will be notified about canvas interactions
+ * @param {Socket} the socket that will listen for these events
+ * @returns
+ */
 function canvasConnection(socket) {
     socket.on("updateCanvas", function(data) {
         g_canvas.in(data.room).emit("updateCanvas", data);
     });
     socket.on("joinCanvas", function(room, callback) {
-        g_canvas.in(room).emit("requestCanvas", room);
+        g_canvas.in(room).emit("requestCanvas", room); //EXTREMELY INNEFFICIENT
         this.join(room);
         callback();
     });
 }
 
+/**
+ * Denies a friend request and invokes the supplied callback on completion
+ * @param {Object} the associated user data
+ * @param {Function} invoked on completion
+ * @returns
+ */
 function denyFriend(data, callback) {
     data.session = this.id;
     chatdb.denyFriend(data, callback);
     friendChange.call(this, data.username, "remove", "leave");
 }
 
+/**
+ * Logs the current user of the application
+ * @param {Function} invoked on completion
+ * @returns
+ */
 function logout(callback) {
     var data = {session:this.id}, 
         username = getSocketUsername(this),
@@ -87,39 +112,80 @@ function logout(callback) {
     chatdb.logout(data, callback);
 }
 
+
+/**
+ * The supplied '/friend' socket will be notified about friend interactions
+ * @param {Socket} the socket that will listen for these events
+ * @returns
+ */
 function friendsConnection(socket) {
     socket
         .on("sendStatus", sendStatus);
 }
 
+/**
+ * Standard socket.io disconnect handler
+ * @returns
+ */
 function disconnect() {
     logout.call(this, function() {});
 }
 
+/**
+ * Add a friend to your friends list
+ * @param {Object} the associate friend and user data
+ * @param {Function} invoked on completion
+ * @returns
+ */
 function addFriend(data, callback) {
     data.session = this.id;
     chatdb.addFriend(data, callback);
     friendChange.call(this, data.username, "add", "join");
 }
 
+
+/**
+ * Block a user
+ * @param {Object} the associate friend and user data
+ * @param {Function} invoked on completion
+ * @returns
+ */
 function blockUser(data, callback) {
     data.session = this.id;
     chatdb.blockUser(data, callback);
     friendChange.call(this, data.username, "block", "leave");
 }
 
+/**
+ * Unblock a user
+ * @param {Object} the associate friend and user data
+ * @param {Function} invoked on completion
+ * @returns
+ */
 function unblockUser(data, callback) {
     data.session = this.id;
     chatdb.unblockUser(data, callback);
     friendChange.call(this, data.username, "unblock", false);
 }
 
+/**
+ * Remove a friend from your friends list
+ * @param {Object} the associate friend and user data
+ * @param {Function} invoked on completion
+ * @returns
+ */
 function removeFriend(data, callback) {
     data.session = this.id;
     chatdb.removeFriend(data, callback);
     friendChange.call(this, data.username, "remove", "leave");
 }
 
+
+/**
+ * Gets the specified socket's associated username
+ * @param {Socket} socket whose associated username is desired
+ * @returns {String} the socket's associated username
+ */
 function getSocketUsername(socket) {
     var usernames = g_io.sockets.manager.roomClients[socket.id]; //get the username associated with this socket
     for(var i in usernames) {
@@ -129,10 +195,21 @@ function getSocketUsername(socket) {
     }
 }
 
+/**
+ * Gets the supplied socket within another scope
+ * @param {Socket} the socket to cast
+ * @param {Scope} the scope to obtain
+ * @returns a socket rescoped to other
+ */
 function getSocketAsOther(socket, other) {
     return other.socket(socket.id);
 }
 
+/**
+ * Gets the current list of usernames in a room
+ * @param {String} the name of the chat room to get the list of users for
+ * @param {Function} invoked on completion
+ */
 function getUsersInRoom(room, callback) {
     var users = g_chat.clients(room);
     console.info("Getting users from room " + room + " : " + users.length);
@@ -142,6 +219,13 @@ function getUsersInRoom(room, callback) {
     callback(users);
 }
 
+/**
+ * Changes the friend status of the specified users
+ * @param {String} the username whose status is being changed
+ * @param {String} the new friendship status
+ * @param {String} determines if the other user should join this users associated friend scope
+ * @returns
+ */
 function friendChange(to, status, join_or_leave) {    
     var username = getSocketUsername(this);
     var other_socket = g_user.clients(to)[0]; //get the other users socket
@@ -153,6 +237,11 @@ function friendChange(to, status, join_or_leave) {
     }
 }
 
+/**
+ * Sends a user status to all logged in friends
+ * @param {String} the status to be sent
+ * @returns
+ */
 function sendStatus(status) {
     var username = getSocketUsername(this);
     g_friends.in(username).emit("statusChange", username, status); //emit to all your friends    
@@ -164,6 +253,12 @@ function sendStatus(status) {
     console.info(s);
 }
 
+/**
+ * Turns an object into a readable string
+ * @param {Object} object to be stringified
+ * @param {String} the total accumulated tabbing
+ * @returns
+ */
 function print_r(r, t) {
     var s = "", to;
     t = t || "    ";
@@ -180,9 +275,13 @@ function print_r(r, t) {
 }
 
 /**
+ * Sends a message to all users in the specified room
  * Joins the data.room or a new room and sends the data to all connections in that room 
  * (data.username will be added to this room)
- */ 
+ * @param {Object} data to be sent
+ * @param {Function} invoked on completion
+ * @returns
+ */
 function send(data, callback) {
     joinRoom.call(this, data.room, function(room) { //joins the specified chat room
         data.from = getSocketUsername(this);
@@ -208,17 +307,34 @@ function send(data, callback) {
     });
 }
 
+/**
+ * Joins the specified chat room
+ * @param {String} name of the room to be joined
+ * @param {Function} invoked on completion
+ * @returns
+ */
 function joinRoom(room, callback) {
     this.join(room = (room || new Date().getTime())); //joins the specified room or creates a new one
     g_chat.in(room).emit("userJoinsLeaves", getSocketUsername(this), "join", room);
     callback.call(this, room); //passes the room name back to the caller
 }
 
+/**
+ * Leaves the specified chat room
+ * @param {String} name of the room to be left
+ * @returns
+ */
 function leaveRoom(room) {
     g_chat.in(room).emit("userJoinsLeaves", getSocketUsername(this), "leave", room);
     this.leave(room); //leave the specified chat room
 }
 
+/**
+ * Log in using the specified credentials
+ * @param {Object} credentials to be tested
+ * @param {Function} invoked on completion
+ * @returns
+ */
 function login(credentials, callback) { //this is a user scoped socket
     if(validate(credentials, callback, false)) { //if the login credentials are valid
         var l_user = this, //refernece to this as a local user scoped socket
@@ -254,6 +370,12 @@ function login(credentials, callback) { //this is a user scoped socket
     }
 }
 
+/**
+ * Register using the specified credentials
+ * @param {Object} credentials to be tested
+ * @param {Function} invoked on completion
+ * @returns
+ */
 function register(credentials, callback) { //this is a user scoped socket
     if(validate(credentials, callback, true)) { //if the registration credentials are valid
         var me = this; //store a reference to this for later
@@ -267,6 +389,13 @@ function register(credentials, callback) { //this is a user scoped socket
     }
 }
 
+/**
+ * Validates the specified credentials
+ * @param {Object} credentials to be tested
+ * @param {Function} invoked on completion
+ * @param {Boolean} determines if this function should use additional logic that is used for registering an account
+ * @returns
+ */
 function validate(credentials, callback, isRegistering) {
     var err = {}, u = credentials.username, p = credentials.password;
     if(!u) {
@@ -302,6 +431,11 @@ function validate(credentials, callback, isRegistering) {
     return Object.keys(err).length === 0 || callback(err, null);
 }
 
+/**
+ * Validates the specified password
+ * @param {String} used for testing passwords for certain character containment
+ * @return
+ */ 
 function hasSymbols(p) {
     var u, l, s, n, c, i = 0;
     for(; i < p.length && !(u && l && s && n);) {

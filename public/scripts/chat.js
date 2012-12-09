@@ -25,16 +25,26 @@ user.on("friendChange", function(username, status) {
 });
 
 /**
- * Handled automatically
+ * Handled automatically. Sends an idle status to all friends logged in
+ * @returns
  */ 
 function sendIdle() {
     sendStatus(status = "idle");
 }
 
+/**
+ * Denies the supplied friend request
+ * @param {Object} friend request to be denied
+ * @param {Function} invoked on completion
+ */ 
 function denyFriend(data, callback) {
     user.emit("denyFriend", data, callback);
 }
-
+/**
+ * Log in using the provided credentials
+ * @param {Object} credentials to be tested
+ * @param {Function} invoked on completion
+ */ 
 function login(credentials, callback) {
     user.emit('login', credentials, function(err, data) {
         if(!err) {
@@ -45,6 +55,11 @@ function login(credentials, callback) {
     });
 }
 
+/**
+ * Log in using the provided credentials
+ * @param {Object} credentials to be tested
+ * @param {Function} invoked on completion
+ */ 
 function register(credentials, callback) {
     user.emit('register', credentials, function(err, data) {
             if(!err) {
@@ -57,6 +72,8 @@ function register(credentials, callback) {
 
 /**
  * Sends data to data.room, adding data.username to the room
+ * @param {Object} message to be sent
+ * @param {Function} invoked on completion
  */  
 function send(data, callback) {
     chat.emit("send", data, callback);
@@ -72,43 +89,78 @@ function send(data, callback) {
 /**
  * Joins the specified room or creates a new room if no argument is supplied, 
  * returns the room to the caller
+ * @param {String} name of the chat room to be joined
+ * @param {Function} invoked on completion
  */ 
 function joinRoom(room, callback) {
     chat.emit("joinRoom", room, callback);
 }
 
+/**
+ * Leaves the specified chat room
+ * @param {String} name of the room to be left
+ */ 
 function leaveRoom(room) {
     chat.emit("leaveRoom", room);
 }
  
 /**
- * Handled automatically
+ * Handled automatically - sends the specified status to all logged in friends
  */ 
 function sendStatus(status) {
     friends.emit("sendStatus", status);
 }
 
+/**
+ * Adds the specified user
+ * @param {Object} friend associated data
+ * @param {Function} invoked on completion
+ */ 
 function addFriend(data, callback) {
     user.emit("addFriend", data, callback);
 }
 
+/**
+ * Blocks the specified user
+ * @param {Object} friend associated data
+ * @param {Function} invoked on completion
+ */ 
 function blockUser(data, callback) {
     user.emit("blockUser", data, callback);
 }
 
+/**
+ * Unblocks the specified user
+ * @param {Object} friend associated data
+ * @param {Function} invoked on completion
+ */ 
 function unblockUser(data, callback) {
     user.emit("unblockUser", data, callback);
 }
 
+/**
+ * Removes the specified friend
+ * @param {Object} friend associated data
+ * @param {Function} invoked on completion
+ */ 
 function removeFriend(data, callback) {
     user.emit("removeFriend", data, callback);
 }
 
+/**
+ * Logs the user out
+ * @param {Function} invoked on completion
+ */ 
 function logout(callback) {
     clearTimeout(timeout);
     user.emit("logout", callback);
 }
 
+/**
+ * Gets an array of usernames in a certain room
+ * @param {String} name of the room
+ * @param {Function} invoked on completion
+ */ 
 function getUsersInRoom(room, callback) {
     chat.emit("getUsersInRoom", room, function(users) {
         callback(users);
